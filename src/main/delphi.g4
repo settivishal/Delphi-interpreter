@@ -94,7 +94,7 @@ typeDefinitionPart
     ;
 
 typeDefinition
-    : identifier EQUAL (type_ | functionType | procedureType)
+    : identifier EQUAL (type_ | functionType | procedureType | classType)
     ;
 
 functionType
@@ -266,7 +266,6 @@ resultType
 statement
     : label COLON unlabelledStatement
     | unlabelledStatement
-    | INHERITED (LPAREN parameterList RPAREN)?
     ;
 
 unlabelledStatement
@@ -469,41 +468,127 @@ recordVariableList
     ;
 
 classType
-    : CLASS (LPAREN ancestorList RPAREN)? classBody END
+    : CLASS (ancestorType)?
+      (classHeritage)?
+      classVisibility?
+      classBody
+      END
     ;
 
-ancestorList
-    : identifier (COMMA identifier)*
+ancestorType
+    : LPAREN typeIdentifier RPAREN
+    ;
+
+classHeritage
+    : SEALED
+    | ABSTRACT
+    ;
+
+classVisibility
+    : PUBLIC
+    | PRIVATE
+    | PROTECTED
+    | PUBLISHED
     ;
 
 classBody
-    : visibilitySection+
-    ;
-
-visibilitySection
-    : (PRIVATE | PUBLIC | PROTECTED | PUBLISHED)? classMember+
+    : classMember*
     ;
 
 classMember
-    : variableDeclaration SEMI
-    | methodDeclaration SEMI
-    | constructorDeclaration SEMI
-    | destructorDeclaration SEMI
+    : visibilitySection
+    | memberDeclaration
     ;
 
-methodDeclaration
-    : FUNCTION identifier (formalParameterList)? COLON typeIdentifier
-    | PROCEDURE identifier (formalParameterList)?
-    | FUNCTION identifier (formalParameterList)? COLON typeIdentifier OVERRIDE
-    | PROCEDURE identifier (formalParameterList)? OVERRIDE
+memberDeclaration
+    : visibility? (
+        fieldDeclaration
+        | methodDeclaration
+        | propertyDeclaration
+        | constructorDeclaration
+        | destructorDeclaration
+    )
+    ;
+
+visibility
+    : (STRICT? (PRIVATE | PROTECTED) | PUBLIC | PUBLISHED)
+    ;
+
+fieldDeclaration
+    : identifierList COLON type_ (SEMI fieldModifiers)? SEMI
+    ;
+
+propertyDeclaration
+    : PROPERTY identifier propertyInterface propertySpecifiers? SEMI
+    ;
+
+visibilitySection
+    : (PUBLIC | PRIVATE | PROTECTED | PUBLISHED | STRICT PRIVATE | STRICT PROTECTED) COLON
+    ;
+
+methodSection
+    : (constructorDeclaration | destructorDeclaration | methodDeclaration) SEMI
     ;
 
 constructorDeclaration
-    : CONSTRUCTOR identifier (formalParameterList)?
+    : CONSTRUCTOR identifier (formalParameterList)? (SEMI (VIRTUAL | OVERRIDE | REINTRODUCE))? SEMI block?
     ;
 
 destructorDeclaration
-    : DESTRUCTOR identifier (formalParameterList)?
+    : DESTRUCTOR identifier (SEMI (VIRTUAL | OVERRIDE))? SEMI block?
+    ;
+
+methodDeclaration
+    : (classMethodModifiers)* (
+        (PROCEDURE identifier (formalParameterList)? SEMI block?)
+        | (FUNCTION identifier (formalParameterList)? COLON resultType SEMI block?)
+    )
+    ;
+
+classMethodModifiers
+    : VIRTUAL
+    | OVERRIDE
+    | ABSTRACT
+    | FINAL
+    | REINTRODUCE
+    | CLASS
+    ;
+
+propertySection
+    : PROPERTY identifier propertyInterface propertySpecifiers? SEMI
+    ;
+
+propertyInterface
+    : (propertyParameterList)? COLON typeIdentifier
+    ;
+
+propertyParameterList
+    : LBRACK parameterList RBRACK
+    ;
+
+propertySpecifiers
+    : (READ identifier)?
+      (WRITE identifier)?
+      (STORED (identifier | constant))?
+      (DEFAULT constant)?
+      (NODEFAULT)?
+      (IMPLEMENTS typeIdentifier)?
+      propertyVisibility?
+    ;
+
+propertyVisibility
+    : PUBLIC
+    | PRIVATE
+    | PROTECTED
+    | PUBLISHED
+    ;
+
+fieldSection
+    : identifierList COLON type_ (SEMI fieldModifiers)? SEMI
+    ;
+
+fieldModifiers
+    : STATIC
     ;
 
 AND
@@ -830,6 +915,10 @@ fragment EXPONENT
     : ('E') ('+' | '-')? ('0' .. '9')+
     ;
 
+CLASS
+    : 'CLASS'
+    ;
+
 CONSTRUCTOR
     : 'CONSTRUCTOR'
     ;
@@ -838,8 +927,32 @@ DESTRUCTOR
     : 'DESTRUCTOR'
     ;
 
-CLASS
-    : 'CLASS'
+VIRTUAL
+    : 'VIRTUAL'
+    ;
+
+OVERRIDE
+    : 'OVERRIDE'
+    ;
+
+ABSTRACT
+    : 'ABSTRACT'
+    ;
+
+SEALED
+    : 'SEALED'
+    ;
+
+FINAL
+    : 'FINAL'
+    ;
+
+STRICT
+    : 'STRICT'
+    ;
+
+PUBLIC
+    : 'PUBLIC'
     ;
 
 PRIVATE
@@ -850,18 +963,42 @@ PROTECTED
     : 'PROTECTED'
     ;
 
-PUBLIC
-    : 'PUBLIC'
-    ;
-
 PUBLISHED
     : 'PUBLISHED'
     ;
 
-OVERRIDE
-    : 'OVERRIDE'
+PROPERTY
+    : 'PROPERTY'
     ;
 
-INHERITED
-    : 'INHERITED'
+READ
+    : 'READ'
+    ;
+
+WRITE
+    : 'WRITE'
+    ;
+
+STORED
+    : 'STORED'
+    ;
+
+DEFAULT
+    : 'DEFAULT'
+    ;
+
+NODEFAULT
+    : 'NODEFAULT'
+    ;
+
+IMPLEMENTS
+    : 'IMPLEMENTS'
+    ;
+
+REINTRODUCE
+    : 'REINTRODUCE'
+    ;
+
+STATIC
+    : 'STATIC'
     ;
