@@ -14,4 +14,33 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>4.13.1</version> <!-- You can change the version as needed -->
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>4.13.1</version> <!-- You can change the version as needed -->
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <outputDirectory>src/main/java/org/example/delphi</outputDirectory>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+
 </project>
