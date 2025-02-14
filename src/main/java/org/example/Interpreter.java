@@ -8,31 +8,62 @@ import org.example.antlr.*;
 public class Interpreter {
     public static void main(String[] args) {
         String input = "PROGRAM Test; VAR x: INTEGER; BEGIN x := 1; END."; // Example input
-        String test1 = "PROGRAM Test;\n" +
+
+//        String test1 = "PROGRAM Test;\n" +
+//                "\n" +
+//                "TYPE\n" +
+//                "    Person = CLASS\n" +
+//                "        name: STRING;\n" +
+//                "        age: INTEGER;\n" +
+//                "        PROCEDURE display;\n" +
+//                "    END;\n" +
+//                "\n" +
+//                "PROCEDURE Person.display;\n" +
+//                "BEGIN\n" +
+//                "    WriteLn('Name: ', name);\n" +
+//                "    WriteLn('Age: ', age);\n" +
+//                "END;\n" +
+//                "\n" +
+//                "VAR\n" +
+//                "    p: Person;\n" +
+//                "\n" +
+//                "BEGIN\n" +
+//                "    p := Person.Create;\n" +
+//                "    p.name := 'John Doe';\n" +
+//                "    p.age := 30;\n" +
+//                "    p.display;\n" +
+//                "    p.Destroy;\n" +
+//                "END.";
+
+        String test1 = "PROGRAM SampleProgram;\n" +
+                "\n" +
+                "USES\n" +
+                "  SysUtils;\n" +
+                "\n" +
+                "CONST\n" +
+                "  MaxValue = 10;\n" +
                 "\n" +
                 "TYPE\n" +
-                "    Person = CLASS\n" +
-                "        name: STRING;\n" +
-                "        age: INTEGER;\n" +
-                "        PROCEDURE display;\n" +
-                "    END;\n" +
-                "\n" +
-                "PROCEDURE Person.display;\n" +
-                "BEGIN\n" +
-                "    WriteLn('Name: ', name);\n" +
-                "    WriteLn('Age: ', age);\n" +
-                "END;\n" +
+                "  TPerson = RECORD\n" +
+                "    Name: STRING;\n" +
+                "    Age: INTEGER;\n" +
+                "  END;\n" +
                 "\n" +
                 "VAR\n" +
-                "    p: Person;\n" +
+                "  Person1: TPerson;\n" +
+                "\n" +
+                "PROCEDURE PrintPersonInfo;\n" +
+                "BEGIN\n" +
+                "  WriteLn('Name: ', Person1.Name);\n" +
+                "  WriteLn('Age: ', Person1.Age);\n" +
+                "END;\n" +
                 "\n" +
                 "BEGIN\n" +
-                "    p := Person.Create;\n" +
-                "    p.name := 'John Doe';\n" +
-                "    p.age := 30;\n" +
-                "    p.display;\n" +
-                "    p.Destroy;\n" +
-                "END.";
+                "  Person1.Name := 'John Doe';\n" +
+                "  Person1.Age := 30;\n" +
+                "  PrintPersonInfo;\n" +
+                "END.\n";
+
         delphiLexer lexer = new delphiLexer(CharStreams.fromString(input));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         delphiParser parser = new delphiParser(tokens);
