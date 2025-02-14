@@ -67,8 +67,8 @@ public class Interpreter {
         delphiLexer lexer = new delphiLexer(CharStreams.fromString(input));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         delphiParser parser = new delphiParser(tokens);
-        ParseTree tree = parser.program(); // Start parsing from the program rule
+        ParseTree tree = parser.program();
 
-        System.out.println(tree.toStringTree(parser)); // Print the parse tree
+        System.out.println(tree.toStringTree(parser));
     }
 }
