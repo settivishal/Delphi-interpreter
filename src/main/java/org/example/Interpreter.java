@@ -64,7 +64,30 @@ public class Interpreter {
                 "  PrintPersonInfo;\n" +
                 "END.\n";
 
-        delphiLexer lexer = new delphiLexer(CharStreams.fromString(input));
+        // PROGRAM SampleProgram;
+        // type
+        //  TMyClass = class
+        //  private
+        //    FValue: Integer;
+        //  public
+        //    constructor Create;
+        //    procedure ShowValue;
+        //    property Value: Integer read FValue write FValue;
+        //  end;
+        String test2 = "PROGRAM SampleProgram;\n" +
+                "\n" +
+                "TYPE\n" +
+                "TMyClass = class\n" +
+                "private\n" +
+                "FValue: Integer;\n" +
+                "public\n" +
+                "constructor Create;\n" +  // Constructor
+                "procedure ShowValue;\n" + // Method declaration
+                "property Value: Integer read FValue write FValue;\n" + // Property
+                "END;\n";
+
+
+        delphiLexer lexer = new delphiLexer(CharStreams.fromString(test2));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         delphiParser parser = new delphiParser(tokens);
         ParseTree tree = parser.program();
