@@ -26,8 +26,9 @@ block
         | variableDeclarationPart
         | procedureAndFunctionDeclarationPart
         | usesUnitsPart
-        | IMPLEMENTATION
         | methodImplementation  // new methodImplementation syntax
+        | IMPLEMENTATION
+
     )* compoundStatement
     ;
 
@@ -107,6 +108,7 @@ paramIdentifier
 paramType
     : identifier
     | 'array' 'of' identifier
+    | type_
     ;
 
 returnType
