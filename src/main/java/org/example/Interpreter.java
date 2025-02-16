@@ -5,20 +5,28 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.example.antlr.*;
 import java.io.*;
-    import java.util.Map;
-    import java.util.HashMap;
 
 public class Interpreter {
     public static void main(String[] args) {
-        String test1Content = readPasFile("src\\main\\tests\\test1.pas");
-        String test2Content = readPasFile("src\\main\\tests\\test2.pas");
+        String testDirPath = "src/main/tests/";
 
-        delphiLexer lexer = new delphiLexer(CharStreams.fromString(test2Content));
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        delphiParser parser = new delphiParser(tokens);
-        ParseTree tree = parser.program();
+        // Create a list of test files to process
+        String[] testFiles = {"test1.pas", "test2.pas"};
 
-        System.out.println(tree.toStringTree(parser));
+        for (String testFile : testFiles) {
+            String filePath = testDirPath + testFile;
+            String fileContent = readPasFile(filePath);
+
+            // Process each file
+            delphiLexer lexer = new delphiLexer(CharStreams.fromString(fileContent));
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            delphiParser parser = new delphiParser(tokens);
+            ParseTree tree = parser.program();
+
+            System.out.println("Processing file: " + testFile);
+            System.out.println(tree.toStringTree(parser));
+            System.out.println();
+        }
     }
 
     private static String readPasFile(String filePath) {
