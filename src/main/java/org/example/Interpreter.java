@@ -8,12 +8,19 @@ import java.io.*;
 
 public class Interpreter {
     public static void main(String[] args) {
+        if (args.length == 0) {
+            System.out.println("Please provide test file names as arguments.");
+            System.out.println("Example: java MainClass test1.pas test2.pas");
+            return;
+        }
+
         String testDirPath = "src/main/tests/";
 
-        // Create a list of test files to process
-        String[] testFiles = {"test1.pas", "test2.pas"};
+        for (String testFile : args) {
+            if (!testFile.endsWith(".pas")) {
+                testFile = testFile + ".pas";
+            }
 
-        for (String testFile : testFiles) {
             String filePath = testDirPath + testFile;
             String fileContent = readPasFile(filePath);
 
