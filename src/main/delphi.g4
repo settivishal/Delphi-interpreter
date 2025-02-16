@@ -5,7 +5,7 @@ options {
 }
 
 program
-    : programHeading (INTERFACE)? classDeclarationPart* block* DOT EOF
+    : programHeading (INTERFACE)? (classDeclarationPart END SEMI)* block* DOT EOF
     ;
 
 programHeading
@@ -27,6 +27,18 @@ block
         | usesUnitsPart
         | IMPLEMENTATION
     )* compoundStatement
+    ;
+
+classBlock
+    : (
+        labelDeclarationPart
+        | constantDefinitionPart
+        | typeDefinitionPart
+        | variableDeclarationPart
+        | procedureAndFunctionDeclarationPart
+        | usesUnitsPart
+        | IMPLEMENTATION
+    )* emptyStatement_
     ;
 
 //classType
@@ -268,7 +280,7 @@ resultType
     ;
 
 classDeclarationPart
-    : CLASS identifier COLON block
+    : CLASS identifier COLON classBlock
     ;
 
 statement

@@ -10,17 +10,28 @@ public class Interpreter {
         String input = "PROGRAM Test; VAR x: INTEGER; BEGIN x := 1; END."; // Example input
 
         // Test 1
-        //PROGRAM Test;
-        //
-        //CLASS myCar:
-        //    VAR size: integer;
-        //BEGIN
-        //x := 1;
-        //END
-        //
-        //VAR x: INTEGER;
-        //BEGIN
-        //END.
+//        PROGRAM Test;
+//
+//        class Car:
+//        var size: integer;
+//        function myFunction(var x: integer): integer ;
+//        begin
+//        x := 1;
+//        end;
+//
+//        procedure myProcedure(var x: integer);
+//        begin
+//        x := 1
+//        end;
+//        end;
+//
+//        var myCar: Car;
+//
+//        begin
+//
+//        myCar.size := 5;
+//
+//        end.
 
 
         delphiLexer lexer = new delphiLexer(CharStreams.fromString(input));
