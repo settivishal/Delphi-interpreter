@@ -5,7 +5,7 @@ options {
 }
 
 program
-    : programHeading (INTERFACE)? block DOT EOF
+    : programHeading (INTERFACE)? classDeclarationPart* block* DOT EOF
     ;
 
 programHeading
@@ -17,7 +17,6 @@ identifier
     : IDENT
     ;
 
-// added methodImplementation
 block
     : (
         labelDeclarationPart
@@ -26,125 +25,13 @@ block
         | variableDeclarationPart
         | procedureAndFunctionDeclarationPart
         | usesUnitsPart
-        | methodImplementation  // new methodImplementation syntax
         | IMPLEMENTATION
-
     )* compoundStatement
     ;
 
-// Add these rules to the existing pascal.g4 grammar
-
-// Type definition including class
-
-classType
-    : 'class' (classHeritage)?
-      classVisibility*
-      'end'
-    ;
-
-classHeritage
-    : '(' identifier ')'    // Inheritance from parent class
-    ;
-
-classVisibility
-    : visibilityDirective memberList
-    ;
-
-visibilityDirective
-    : 'private'
-    | 'protected'
-    | 'public'
-    | 'published'
-    ;
-
-memberList
-    : (fieldDeclaration
-    | methodDeclaration
-    | constructorDeclaration
-    | destructorDeclaration)*
-    ;
-
-fieldDeclaration
-    : identifierList ':' type_ ';'
-    ;
-
-methodDeclaration
-    : methodHeading ';'
-    ;
-
-methodHeading
-    : procedureHeading
-    | functionHeading
-    ;
-
-procedureHeading
-    : 'procedure' identifier formalParameters?
-    ;
-
-functionHeading
-    : 'function' identifier formalParameters? ':' returnType
-    ;
-
-constructorDeclaration
-    : 'constructor' identifier formalParameters? ';'
-    ;
-
-destructorDeclaration
-    : 'destructor' identifier ';'
-    ;
-
-formalParameters
-    : '(' formalParm ( ';' formalParm )* ')'
-    ;
-
-formalParm
-    : ('var' | 'const' | 'out')? paramIdentifier ':' paramType
-    ;
-
-paramIdentifier
-    : identifierList
-    ;
-
-paramType
-    : identifier
-    | 'array' 'of' identifier
-    | type_
-    ;
-
-returnType
-    : identifier
-    ;
-
-// Method implementation
-methodImplementation
-    : procedureImplementation
-    | functionImplementation
-    | constructorImplementation
-    | destructorImplementation
-    ;
-
-procedureImplementation
-    : 'procedure' className=identifier '.' methodName=identifier
-      formalParameters? ';'
-      block ';'
-    ;
-
-functionImplementation
-    : 'function' className=identifier '.' methodName=identifier
-      formalParameters? ':' returnType ';'
-      block ';'
-    ;
-
-constructorImplementation
-    : 'constructor' className=identifier '.' methodName=identifier
-      formalParameters? ';'
-      block ';'
-    ;
-
-destructorImplementation
-    : 'destructor' className=identifier '.' methodName=identifier ';'
-      block ';'
-    ;
+//classType
+//    : CLASS
+//    ;
 
 usesUnitsPart
     : USES identifierList SEMI
@@ -226,7 +113,6 @@ type_
     : simpleType
     | structuredType
     | pointerType
-    | classType   // class type added
     ;
 
 simpleType
@@ -379,6 +265,10 @@ functionDeclaration
 
 resultType
     : typeIdentifier
+    ;
+
+classDeclarationPart
+    : CLASS identifier COLON block
     ;
 
 statement
@@ -583,6 +473,10 @@ withStatement
 
 recordVariableList
     : variable (COMMA variable)*
+    ;
+
+CLASS
+    : 'CLASS'
     ;
 
 AND
