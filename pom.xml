@@ -14,11 +14,29 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <!-- Add repositories section -->
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>central</id>-->
+<!--            <name>Maven Central</name>-->
+<!--            <url>https://repo.maven.apache.org/maven2</url>-->
+<!--        </repository>-->
+<!--    </repositories>-->
+
+<!--    &lt;!&ndash; Add pluginRepositories section &ndash;&gt;-->
+<!--    <pluginRepositories>-->
+<!--        <pluginRepository>-->
+<!--            <id>central</id>-->
+<!--            <name>Maven Central</name>-->
+<!--            <url>https://repo.maven.apache.org/maven2</url>-->
+<!--        </pluginRepository>-->
+<!--    </pluginRepositories>-->
+
     <dependencies>
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
-            <version>4.13.1</version> <!-- You can change the version as needed -->
+            <version>4.13.1</version>
         </dependency>
     </dependencies>
 
@@ -27,7 +45,7 @@
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
-                <version>4.13.1</version> <!-- You can change the version as needed -->
+                <version>4.13.1</version>
                 <executions>
                     <execution>
                         <goals>
@@ -37,6 +55,14 @@
                 </executions>
                 <configuration>
                     <outputDirectory>src/main/java/org/example/delphi</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <mainClass>org.example.Interpreter</mainClass>
                 </configuration>
             </plugin>
         </plugins>
