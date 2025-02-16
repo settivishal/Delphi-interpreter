@@ -9,6 +9,34 @@ public class Interpreter {
     public static void main(String[] args) {
         String input = "PROGRAM Test; VAR x: INTEGER; BEGIN x := 1; END."; // Example input
 
+        //PROGRAM SampleProgram;
+        //
+        //USES
+        //  SysUtils;
+        //
+        //CONST
+        //  MaxValue = 10;
+        //
+        //TYPE
+        //  TPerson = RECORD
+        //    Name: STRING;
+        //    Age: INTEGER;
+        //  END;
+        //
+        //VAR
+        //  Person1: TPerson;
+        //
+        //PROCEDURE PrintPersonInfo;
+        //BEGIN
+        //  WriteLn('Name: ', Person1.Name);
+        //  WriteLn('Age: ', Person1.Age);
+        //END;
+        //
+        //BEGIN
+        //  Person1.Name := 'John Doe';
+        //  Person1.Age := 30;
+        //  PrintPersonInfo;
+        //END.
 //        String test1 = "PROGRAM Test;\n" +
 //                "\n" +
 //                "TYPE\n" +
@@ -63,6 +91,8 @@ public class Interpreter {
                 "  Person1.Age := 30;\n" +
                 "  PrintPersonInfo;\n" +
                 "END.\n";
+
+        System.out.println(test1);
 
         // PROGRAM SampleProgram;
         // type
