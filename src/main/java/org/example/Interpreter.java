@@ -4,52 +4,35 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.example.antlr.*;
+import java.io.*;
+    import java.util.Map;
+    import java.util.HashMap;
 
 public class Interpreter {
     public static void main(String[] args) {
-        String input = "PROGRAM Test; VAR x: INTEGER; BEGIN x := 1; END."; // Example input
+        String test1Content = readPasFile("src\\main\\tests\\test1.pas");
+        String test2Content = readPasFile("src\\main\\tests\\test2.pas");
 
-        // Test 1
-        //PROGRAM Test;
-        //
-        //class Car:
-        //    public constructor Cons(var y: integer);
-        //        begin
-        //            y := 1;
-        //        end;
-        //
-        //    public destructor Desc;
-        //        begin
-        //            writeln('destructor');
-        //        end;
-        //    private var size: integer;
-        //    public function myFunction(var x: integer): integer ;
-        //        begin
-        //            x := 1;
-        //        end;
-        //
-        //    public procedure myProcedure(var x: integer);
-        //        begin
-        //            x := 1
-        //        end;
-        //end;
-        //
-        //var myCar: Car;
-        //var z: integer;
-        //begin
-        //    myCar := Car.Cons(1);
-        //    z := myCar.myFunction(5);
-        //    myCar.size := 5;
-        //    myCar.myProcedure(1);
-        //    myCar.Desc;
-        //end.
-
-
-        delphiLexer lexer = new delphiLexer(CharStreams.fromString(input));
+        delphiLexer lexer = new delphiLexer(CharStreams.fromString(test2Content));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         delphiParser parser = new delphiParser(tokens);
         ParseTree tree = parser.program();
 
         System.out.println(tree.toStringTree(parser));
+    }
+
+    private static String readPasFile(String filePath) {
+        StringBuilder fileContent = new StringBuilder();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                fileContent.append(line).append("\n"); // Preserve line breaks
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading the file: " + filePath + " - " + e.getMessage());
+        }
+
+        return fileContent.toString();
     }
 }
