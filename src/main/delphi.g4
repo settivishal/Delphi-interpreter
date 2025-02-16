@@ -5,7 +5,7 @@ options {
 }
 
 program
-    : programHeading (INTERFACE)? (classDeclarationPart END SEMI)* block* DOT EOF
+    : programHeading (interfaceDeclarationPart END SEMI)* (classDeclarationPart END SEMI)* block* DOT EOF
     ;
 
 programHeading
@@ -322,6 +322,10 @@ resultType
 
 classDeclarationPart
     : CLASS identifier COLON classBlock
+    ;
+
+interfaceDeclarationPart
+    : INTERFACE identifier COLON classBlock
     ;
 
 statement
