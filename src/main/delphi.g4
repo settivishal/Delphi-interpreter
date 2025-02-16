@@ -34,8 +34,8 @@ classBlock
         labelDeclarationPart
         | constantDefinitionPart
         | typeDefinitionPart
-        | variableDeclarationPart
-        | procedureAndFunctionDeclarationPart
+        | classVariableDeclarationPart
+        | classProcedureAndFunctionDeclarationPart
         | methodImplementation
         | usesUnitsPart
         | IMPLEMENTATION
@@ -236,8 +236,16 @@ variableDeclaration
     : identifierList COLON type_
     ;
 
+classVariableDeclarationPart
+    : (visibility)? VAR variableDeclaration (SEMI variableDeclaration)* SEMI
+    ;
+
 procedureAndFunctionDeclarationPart
     : procedureOrFunctionDeclaration SEMI
+    ;
+
+classProcedureAndFunctionDeclarationPart
+    : classProcedureOrFunctionDeclaration SEMI
     ;
 
 procedureOrFunctionDeclaration
@@ -245,8 +253,17 @@ procedureOrFunctionDeclaration
     | functionDeclaration
     ;
 
+classProcedureOrFunctionDeclaration
+    : classProcedureDeclaration
+    | classFunctionDeclaration
+    ;
+
 procedureDeclaration
     : PROCEDURE identifier (formalParameterList)? SEMI block
+    ;
+
+classProcedureDeclaration
+    : (visibility)? PROCEDURE identifier (formalParameterList)? SEMI block
     ;
 
 formalParameterList
@@ -276,17 +293,27 @@ functionDeclaration
     : FUNCTION identifier (formalParameterList)? COLON resultType SEMI block
     ;
 
+classFunctionDeclaration
+    : (visibility)? FUNCTION identifier (formalParameterList)? COLON resultType SEMI block
+    ;
+
 methodImplementation
     : constructorImplementation SEMI
     | destructorImplementation SEMI
     ;
 
 constructorImplementation
-    : CONSTRUCTOR identifier (formalParameterList)? SEMI block
+    : (visibility)? CONSTRUCTOR identifier (formalParameterList)? SEMI block
     ;
 
 destructorImplementation
-    : DESTRUCTOR identifier SEMI block
+    : (visibility)? DESTRUCTOR identifier SEMI block
+    ;
+
+visibility
+    : PRIVATE
+    | PROTECTED
+    | PUBLIC
     ;
 
 resultType
@@ -436,11 +463,6 @@ emptyStatement_
     :
     ;
 
-empty_
-    :
-    /* empty */
-    ;
-
 structuredStatement
     : compoundStatement
     | conditionalStatement
@@ -521,6 +543,18 @@ CONSTRUCTOR
 
 DESTRUCTOR
     : 'DESTRUCTOR'
+    ;
+
+PRIVATE
+    : 'PRIVATE'
+    ;
+
+PUBLIC
+    : 'PUBLIC'
+    ;
+
+PROTECTED
+    : 'PROTECTED'
     ;
 
 AND
