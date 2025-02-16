@@ -36,6 +36,7 @@ classBlock
         | typeDefinitionPart
         | variableDeclarationPart
         | procedureAndFunctionDeclarationPart
+        | methodImplementation
         | usesUnitsPart
         | IMPLEMENTATION
     )* emptyStatement_
@@ -275,6 +276,19 @@ functionDeclaration
     : FUNCTION identifier (formalParameterList)? COLON resultType SEMI block
     ;
 
+methodImplementation
+    : constructorImplementation SEMI
+    | destructorImplementation SEMI
+    ;
+
+constructorImplementation
+    : CONSTRUCTOR identifier (formalParameterList)? SEMI block
+    ;
+
+destructorImplementation
+    : DESTRUCTOR identifier SEMI block
+    ;
+
 resultType
     : typeIdentifier
     ;
@@ -294,10 +308,15 @@ unlabelledStatement
     ;
 
 simpleStatement
-    : assignmentStatement
+    : classMethodStatement
+    | assignmentStatement
     | procedureStatement
     | gotoStatement
     | emptyStatement_
+    ;
+
+classMethodStatement
+    : identifier DOT identifier (LPAREN parameterList RPAREN)?
     ;
 
 assignmentStatement
@@ -357,6 +376,7 @@ factor
     : variable
     | LPAREN expression RPAREN
     | functionDesignator
+    | classMethodDesignator
     | unsignedConstant
     | set_
     | NOT factor
@@ -376,6 +396,10 @@ functionDesignator
 
 parameterList
     : actualParameter (COMMA actualParameter)*
+    ;
+
+classMethodDesignator
+    : identifier DOT identifier LPAREN (parameterList)? RPAREN
     ;
 
 set_
@@ -489,6 +513,14 @@ recordVariableList
 
 CLASS
     : 'CLASS'
+    ;
+
+CONSTRUCTOR
+    : 'CONSTRUCTOR'
+    ;
+
+DESTRUCTOR
+    : 'DESTRUCTOR'
     ;
 
 AND

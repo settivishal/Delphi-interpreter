@@ -13,6 +13,15 @@ public class Interpreter {
 //        PROGRAM Test;
 //
 //        class Car:
+//        constructor Cons(var y: integer);
+//        begin
+//        y := 1;
+//        end;
+//
+//        destructor Desc;
+//        begin
+//        writeln('destructor');
+//        end;
 //        var size: integer;
 //        function myFunction(var x: integer): integer ;
 //        begin
@@ -26,11 +35,13 @@ public class Interpreter {
 //        end;
 //
 //        var myCar: Car;
-//
+//        var z: integer;
 //        begin
-//
+//        myCar := Car.Cons(1);
+//        z := myCar.myFunction(5);
 //        myCar.size := 5;
-//
+//        myCar.myProcedure(1);
+//        myCar.Desc;
 //        end.
 
 
