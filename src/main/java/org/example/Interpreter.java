@@ -10,7 +10,7 @@ public class Interpreter {
     public static void main(String[] args) {
         if (args.length == 0) {
             System.out.println("Please provide test file names as arguments.");
-            System.out.println("Example: java MainClass test1.pas test2.pas");
+            System.out.println("Example: mvn exec:java -D\"exec.mainClass\"=\"org.example.Interpreter\" -D\"exec.args\"=\"test1 ...\"");
             return;
         }
 

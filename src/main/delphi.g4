@@ -5,7 +5,7 @@ options {
 }
 
 program
-    : programHeading (interfaceDeclarationPart END SEMI)* (classDeclarationPart END SEMI)* block* DOT EOF
+    : programHeading (interfaceOrClassDeclarationPart END SEMI)* (block DOT)* EOF
     ;
 
 programHeading
@@ -15,6 +15,11 @@ programHeading
 
 identifier
     : IDENT
+    ;
+
+interfaceOrClassDeclarationPart
+    : interfaceDeclarationPart
+    | classDeclarationPart
     ;
 
 block
@@ -42,6 +47,18 @@ classBlock
     )* emptyStatement_
     ;
 
+interfaceBlock
+    : (
+        labelDeclarationPart
+        | constantDefinitionPart
+        | typeDefinitionPart
+        | interfaceVariableDeclarationPart
+        | interfaceProcedureAndFunctionDeclarationPart
+        | methodImplementation
+        | usesUnitsPart
+        | IMPLEMENTATION
+    )* emptyStatement_
+    ;
 //classType
 //    : CLASS
 //    ;
@@ -240,12 +257,20 @@ classVariableDeclarationPart
     : (visibility)? VAR variableDeclaration (SEMI variableDeclaration)* SEMI
     ;
 
+interfaceVariableDeclarationPart
+    : (visibility)? CONST variableDeclaration (SEMI variableDeclaration)* SEMI
+    ;
+
 procedureAndFunctionDeclarationPart
     : procedureOrFunctionDeclaration SEMI
     ;
 
 classProcedureAndFunctionDeclarationPart
     : classProcedureOrFunctionDeclaration SEMI
+    ;
+
+interfaceProcedureAndFunctionDeclarationPart
+    : interfaceProcedureAndFunctionDeclaration SEMI
     ;
 
 procedureOrFunctionDeclaration
@@ -258,12 +283,21 @@ classProcedureOrFunctionDeclaration
     | classFunctionDeclaration
     ;
 
+interfaceProcedureAndFunctionDeclaration
+    : interfaceProcedureDeclaration
+    | interfaceFunctionDeclaration
+    ;
+
 procedureDeclaration
     : PROCEDURE identifier (formalParameterList)? SEMI block
     ;
 
 classProcedureDeclaration
     : (visibility)? PROCEDURE identifier (formalParameterList)? SEMI block
+    ;
+
+interfaceProcedureDeclaration
+    : (visibility)? PROCEDURE identifier (formalParameterList)?
     ;
 
 formalParameterList
@@ -297,6 +331,10 @@ classFunctionDeclaration
     : (visibility)? FUNCTION identifier (formalParameterList)? COLON resultType SEMI block
     ;
 
+interfaceFunctionDeclaration
+    : (visibility)? FUNCTION identifier (formalParameterList)? COLON resultType
+    ;
+
 methodImplementation
     : constructorImplementation SEMI
     | destructorImplementation SEMI
@@ -325,7 +363,7 @@ classDeclarationPart
     ;
 
 interfaceDeclarationPart
-    : INTERFACE identifier COLON classBlock
+    : INTERFACE identifier COLON interfaceBlock
     ;
 
 statement
