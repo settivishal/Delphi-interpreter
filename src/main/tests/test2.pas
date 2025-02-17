@@ -1,12 +1,12 @@
-Program Tes;
+Program Test;
 
 class Car:
-    public constructor Cons(var y: integer);
+    public constructor Car(var y: integer);
         begin
             y := 1;
         end;
 
-    public destructor Desc;
+    public destructor Car;
         begin
             writeln('destructor');
         end;
@@ -24,10 +24,16 @@ end;
 
 var myCar: Car;
 var z: integer;
+var a: integer;
+var b: integer;
 begin
-    myCar := Car.Cons(1);
+    myCar := Car.Car(1);
     z := myCar.myFunction(5);
     myCar.size := 5;
     myCar.myProcedure(1);
     myCar.Desc;
+
+    a := 10;
+    b := a;
+
 end.
