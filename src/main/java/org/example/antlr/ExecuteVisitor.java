@@ -55,7 +55,6 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
 
     private final Map<String, ClassImplementation> classes = new HashMap<>();
     private final Map<String, ObjectImplementation> objects = new HashMap<>();
-
     private final Map<String, VariableImplementation> variables = new HashMap<>();
 
     @Override

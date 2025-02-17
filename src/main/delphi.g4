@@ -59,9 +59,6 @@ interfaceBlock
         | IMPLEMENTATION
     )* emptyStatement_
     ;
-//classType
-//    : CLASS
-//    ;
 
 usesUnitsPart
     : USES identifierList SEMI
