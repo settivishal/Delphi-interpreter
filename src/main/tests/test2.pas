@@ -26,6 +26,7 @@ var myCar: Car;
 var z: integer;
 var a: integer;
 var b: integer;
+
 begin
     myCar := Car.Car(1);
     z := myCar.myFunction(5);
@@ -35,5 +36,7 @@ begin
 
     a := 10;
     b := a;
+
+    writeln(b);
 
 end.

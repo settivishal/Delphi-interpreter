@@ -182,16 +182,44 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     }
 
     @Override
-    public Object visitCompoundStatement(delphiParser.CompoundStatementContext ctx) {
+    public Object visitProcedureStatement(delphiParser.ProcedureStatementContext ctx) {
         if (ctx.getText().contains("writeln")) {
-            String pattern = "writeln\\((\\d+)\\)";
-            Pattern regex = Pattern.compile(pattern);
-            Matcher matcher = regex.matcher(ctx.getText());
-            while (matcher.find()) {
-                String value = matcher.group(1);
-                System.out.println("value in writeln: " + value);
+            String input = ctx.getText();
+            Pattern pattern = Pattern.compile("\\((.*?)\\)");
+            Matcher matcher = pattern.matcher(input);
+
+            String value = "";
+
+            if (matcher.find()) {
+                value = matcher.group(1); // Extracts the content inside "()"
+                System.out.println("Value inside the brackets: " + value);
+            } else {
+                System.out.println("No brackets or value found in the input string");
             }
+
+
+            // Case 1: If the value is enclosed in single quotes '...'
+            if (value.startsWith("'") && value.endsWith("'")) {
+                value =  value.substring(1, value.length() - 1); // Extract string inside quotes
+            }
+
+            // Case 2: If the value is an integer
+            else if (value.matches("\\d+")) { // Check if the value is all digits
+                value = value;
+            }
+
+            // Case 3: For any other string, check if it exists in the variables map
+            else if (variables.containsKey(value)) {
+                value = variables.get(value).value;
+            }
+
+            else {
+                System.out.println("Error: variable " + value + " does not exist");
+            }
+
+            System.out.println("value in writeln: " + value);
         }
+
         return visitChildren(ctx);
     }
 
