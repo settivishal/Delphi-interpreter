@@ -22,14 +22,41 @@ class ObjectImplementation {
     }
 }
 
+class VariableImplementation {
+    String name;
+    String type;
+    String value;
+
+    String visibility = "public";
+
+    VariableImplementation(String name, String type) {
+        this.name = name;
+        this.type = type;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
+    }
+}
+
 public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     private ClassImplementation currentClass = null;
+
+    private ObjectImplementation currentObject = null;
+
+    private VariableImplementation currentVariable = null;
 
     // Default visibility to "PUBLIC"
     private String currentVisibility = "public";
 
     private final Map<String, ClassImplementation> classes = new HashMap<>();
     private final Map<String, ObjectImplementation> objects = new HashMap<>();
+
+    private final Map<String, VariableImplementation> variables = new HashMap<>();
 
     @Override
     public Object visitProgram(delphiParser.ProgramContext ctx) {
@@ -41,6 +68,10 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
 
         for (String objectName: objects.keySet()) {
             System.out.println(" " + objectName + " => " + objects.get(objectName));
+        }
+
+        for (String variableName: variables.keySet()) {
+            System.out.println(" " + variableName + " => " + variables.get(variableName));
         }
 
         return visitChildren(ctx);
@@ -78,8 +109,53 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     @Override
     public Object visitClassVariableDeclarationPart(delphiParser.ClassVariableDeclarationPartContext ctx) {
 //        visit(ctx.visibility());
+
+        String input = ctx.getChild(2).getText();
+        String[] parts = input.split(":");
+
+        String name = parts[0]; // "size"
+        String type = parts[1]; // "integer"
+
+        System.out.println("class variable name "+name);
+        System.out.println("class variable type "+type);
+
+        currentVariable = new VariableImplementation(name, type);
+        currentVisibility = ctx.getChild(0).getText();
+        currentVariable.setVisibility(currentVisibility);
+
+        // add to the hashmap
+        variables.put(currentVariable.name, currentVariable);
+
         return super.visitClassVariableDeclarationPart(ctx);
     }
+
+    public Object visitVariableDeclarationPart(delphiParser.VariableDeclarationPartContext ctx) {
+
+
+        String input = ctx.getChild(1).getText();
+        String[] parts = input.split(":");
+
+        String name = parts[0];
+        String type = parts[1];
+
+        System.out.println("variable name "+name);
+        System.out.println("variable type "+type);
+
+        currentVariable = new VariableImplementation(name, type);
+
+        variables.put(currentVariable.name, currentVariable);
+
+        // if type is class then this is an object
+        if (classes.containsKey(type)) {
+            currentObject = new ObjectImplementation(classes.get(type));
+            objects.put(currentVariable.name, currentObject);
+            System.out.println("Object: " + currentVariable.name);
+        }
+
+        return super.visitVariableDeclarationPart(ctx);
+    }
+
+
 
     @Override
     public Void visitVisibility(delphiParser.VisibilityContext ctx) {
@@ -126,6 +202,49 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
             String str = ctx.getText();
             String variable = str.split(":=")[0].trim();
             String value = str.split(":=")[1].trim();
+
+            if (variables.containsKey(variable)) {
+                currentVariable = variables.get(variable);
+            }
+
+            // If the assignment is to a function call inside the Class or Constructor
+            if (objects.containsKey(variable)) {
+                currentObject = objects.get(variable);
+
+                String[] parts = value.split("\\.");
+
+                // Extract the constructor name and argument
+                String constructorPart = parts[1]; // Example: "Car(1)"
+                String constructorName = constructorPart.substring(0, constructorPart.indexOf("(")); // Extracting "Car"
+                String passedValue = constructorPart.substring(constructorPart.indexOf("(") + 1, constructorPart.indexOf(")"));
+
+                System.out.println("Object: " + currentObject.classInfo.name + " Constructor: " + constructorName + " Passed value: " + passedValue);
+
+                return visitChildren(ctx);
+
+            }
+
+
+            // Case 1: If the value is enclosed in single quotes '...'
+            if (value.startsWith("'") && value.endsWith("'")) {
+                value =  value.substring(1, value.length() - 1); // Extract string inside quotes
+            }
+
+            // Case 2: If the value is an integer
+            else if (value.matches("\\d+")) { // Check if the value is all digits
+                value = value;
+            }
+
+            // Case 3: For any other string, check if it exists in the variables map
+            else if (variables.containsKey(value)) {
+                value = variables.get(value).value; // Return the value of the variable
+            }
+
+            else {
+                System.out.println("Error: variable " + value + " does not exist");
+            }
+
+            currentVariable.setValue(value);
 
             System.out.println("variable " + variable + " is assigned with value " + value);
         }

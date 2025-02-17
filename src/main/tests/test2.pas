@@ -24,10 +24,16 @@ end;
 
 var myCar: Car;
 var z: integer;
+var a: integer;
+var b: integer;
 begin
-    myCar := Car.Cons(1);
+    myCar := Car.Car(1);
     z := myCar.myFunction(5);
     myCar.size := 5;
     myCar.myProcedure(1);
     myCar.Desc;
+
+    a := 10;
+    b := a;
+
 end.
