@@ -57,17 +57,12 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     }
 
     @Override
-    public Object visitVisibility(delphiParser.VisibilityContext ctx) {
-        currentVisibility = ctx.getChild(0).getText().toLowerCase();
-        System.out.println("Current visibility: " + currentVisibility);
-        return super.visitVisibility(ctx);
-    }
-
-    @Override
     public Void visitClassBlock(delphiParser.ClassBlockContext ctx) {
-//        if (ctx.classVariableDeclarationPart() != null) {
-//            visit(ctx.classVariableDeclarationPart());
-//        }
+        if (ctx.classVariableDeclarationPart() != null) {
+            for (delphiParser.ClassVariableDeclarationPartContext varCtx : ctx.classVariableDeclarationPart()) {
+                visit(varCtx);
+            }
+        }
         if (ctx.methodImplementation().getFirst().constructorImplementation() != null) {
             visit(ctx.methodImplementation().getFirst().constructorImplementation());
         }
@@ -76,6 +71,19 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         }
 
         return null;
+    }
+
+    @Override
+    public Void visitClassVariableDeclarationPart(delphiParser.ClassVariableDeclarationPartContext ctx) {
+        visit(ctx.visibility());
+        return null;
+    }
+
+    @Override
+    public Object visitVisibility(delphiParser.VisibilityContext ctx) {
+        currentVisibility = ctx.getChild(0).getText().toLowerCase();
+        System.out.println("Current visibility: " + currentVisibility);
+        return super.visitVisibility(ctx);
     }
 
     @Override
