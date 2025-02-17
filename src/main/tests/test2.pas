@@ -1,12 +1,12 @@
 Program Test;
 
 class Car:
-    public constructor Cons(var y: integer);
+    public constructor Car(var y: integer);
         begin
             y := 1;
         end;
 
-    public destructor Desc;
+    public destructor Car;
         begin
             writeln('destructor');
         end;

@@ -5,6 +5,7 @@ import java.util.*;
 
 class ClassImplementation {
     String name;
+
     boolean hasConstructor = false;
     boolean hasDestructor = false;
 
@@ -49,9 +50,9 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     public Void visitClassDeclarationPart(delphiParser.ClassDeclarationPartContext ctx) {
         String className = ctx.identifier().getText();
         currentClass = new ClassImplementation(className);
-        visit(ctx.classBlock());
         classes.put(className, currentClass);
         System.out.println("Class: " + className + ", details: " + currentClass);
+        visit(ctx.classBlock());
         currentClass = null;
         return null;
     }
@@ -63,45 +64,46 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                 visit(varCtx);
             }
         }
-        if (ctx.methodImplementation().getFirst().constructorImplementation() != null) {
-            visit(ctx.methodImplementation().getFirst().constructorImplementation());
-        }
-        if (ctx.methodImplementation().getFirst().destructorImplementation() != null) {
-            visit(ctx.methodImplementation().getFirst().destructorImplementation());
+        if (ctx.methodImplementation() != null) {
+            for (delphiParser.MethodImplementationContext methodCtx: ctx.methodImplementation()) {
+                if (methodCtx != null) {
+                    visit(methodCtx);
+                }
+            }
         }
 
         return null;
     }
 
     @Override
-    public Void visitClassVariableDeclarationPart(delphiParser.ClassVariableDeclarationPartContext ctx) {
-        visit(ctx.visibility());
-        return null;
+    public Object visitClassVariableDeclarationPart(delphiParser.ClassVariableDeclarationPartContext ctx) {
+//        visit(ctx.visibility());
+        return super.visitClassVariableDeclarationPart(ctx);
     }
 
     @Override
-    public Object visitVisibility(delphiParser.VisibilityContext ctx) {
+    public Void visitVisibility(delphiParser.VisibilityContext ctx) {
         currentVisibility = ctx.getChild(0).getText().toLowerCase();
         System.out.println("Current visibility: " + currentVisibility);
-        return super.visitVisibility(ctx);
+        return null;
     }
 
     @Override
-    public Void visitConstructorImplementation(delphiParser.ConstructorImplementationContext ctx) {
+    public Object visitConstructorImplementation(delphiParser.ConstructorImplementationContext ctx) {
         if (currentClass != null) {
             currentClass.hasConstructor = true;
             System.out.println("Constructor name: " + currentClass.name);
         }
-        return null;
+        return super.visitConstructorImplementation(ctx);
     }
 
     @Override
-    public Void visitDestructorImplementation(delphiParser.DestructorImplementationContext ctx) {
+    public Object visitDestructorImplementation(delphiParser.DestructorImplementationContext ctx) {
         if (currentClass != null) {
             currentClass.hasDestructor = true;
             System.out.println("Destructor name: " + currentClass.name);
         }
-        return null;
+        return super.visitDestructorImplementation(ctx);
     }
 
     @Override

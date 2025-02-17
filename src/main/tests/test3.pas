@@ -5,7 +5,7 @@ class Human:
     public var age: integer;
     public var sex: string;
 
-    public constructor Create(var name: string; var age: integer; var sex: string);
+    public constructor Human(var name: string; var age: integer; var sex: string);
         begin
             name := name;
             age := age;
