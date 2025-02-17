@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.example.antlr.*;
 import java.io.*;
+import org.example.antlr.ExecuteVisitor;
 
 public class Interpreter {
     public static void main(String[] args) {
@@ -33,6 +34,9 @@ public class Interpreter {
             System.out.println("Processing file: " + testFile);
             System.out.println(tree.toStringTree(parser));
             System.out.println();
+
+            ExecuteVisitor visitor = new ExecuteVisitor();
+            visitor.visit(tree);
         }
     }
 
