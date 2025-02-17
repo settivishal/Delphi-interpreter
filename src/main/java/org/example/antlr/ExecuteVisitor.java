@@ -124,7 +124,6 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         currentVariable.setVisibility(currentVisibility);
 
         // add to the hashmap
-
         variables.put(currentVariable.name, currentVariable);
 
         return super.visitClassVariableDeclarationPart(ctx);
@@ -145,6 +144,13 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         currentVariable = new VariableImplementation(name, type);
 
         variables.put(currentVariable.name, currentVariable);
+
+        // if type is class then this is an object
+        if (classes.containsKey(type)) {
+            currentObject = new ObjectImplementation(classes.get(type));
+            objects.put(currentVariable.name, currentObject);
+            System.out.println("Object: " + currentVariable.name);
+        }
 
         return super.visitVariableDeclarationPart(ctx);
     }
@@ -200,6 +206,24 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
             if (variables.containsKey(variable)) {
                 currentVariable = variables.get(variable);
             }
+
+            // If the assignment is to a function call inside the Class or Constructor
+            if (objects.containsKey(variable)) {
+                currentObject = objects.get(variable);
+
+                String[] parts = value.split("\\.");
+
+                // Extract the constructor name and argument
+                String constructorPart = parts[1]; // Example: "Car(1)"
+                String constructorName = constructorPart.substring(0, constructorPart.indexOf("(")); // Extracting "Car"
+                String passedValue = constructorPart.substring(constructorPart.indexOf("(") + 1, constructorPart.indexOf(")"));
+
+                System.out.println("Object: " + currentObject.classInfo.name + " Constructor: " + constructorName + " Passed value: " + passedValue);
+
+                return visitChildren(ctx);
+
+            }
+
 
             // Case 1: If the value is enclosed in single quotes '...'
             if (value.startsWith("'") && value.endsWith("'")) {
