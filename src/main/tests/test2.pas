@@ -1,4 +1,4 @@
-Program Tes;
+Program Test;
 
 class Car:
     public constructor Cons(var y: integer);
