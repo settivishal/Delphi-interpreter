@@ -36,13 +36,19 @@ This project extends Pascal to support:
 - Classes and Objects
     - Enables modular programming by grouping related data and behaviors.
     - Supports defining class blueprints with attributes (fields) and methods.
+    - Both Grammar and Interpreter have been implemented.
 
 - Constructors and Destructors
     - Constructors: Special methods that initialize objects upon creation.
     - Destructors: Handle resource cleanup before an object is removed from memory.
+    - Both Grammar and Interpreter have been implemented.
 
 - Encapsulation
     - Implements access specifiers (private, public and protected) to restrict or expose class members.
+    - Both Grammar and Interpreter have been implemented.
+
+- Interfaces
+    - Grammar for interfaces added enabling abstraction in the language.
 
 ## Installation & Build
 - Download the .zip file and extract the files into a folder.
