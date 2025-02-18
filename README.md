@@ -73,14 +73,16 @@ mvn compile
 ```
 
 - **Run the program**
-```
-mvn exec:java -D"exec.mainClass"="org.example.Interpreter"
-```
 
-## Testing
-You need to write test cases covering all implemented features. Recommended approach:
+
+- You need to write test cases covering all implemented features. 
+
+
+**Recommended approach:**
+
 
 - Run multiple test files present i.e, test1.pas, test2.pas, test3.pas, test4.pas, test5.pas.
+
 
 - Run the test cases:
 ```
