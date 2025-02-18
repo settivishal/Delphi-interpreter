@@ -1,4 +1,4 @@
-// Generated from E:/Masters/Spring 2025/PLP/Projects/Delphi/src/main/delphi.g4 by ANTLR 4.13.2
+// Generated from E:/Masters/Spring 2025/PLP/Projects/Delphi-interpreter/src/main/delphi.g4 by ANTLR 4.13.2
 
 package org.example.antlr;
 

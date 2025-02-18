@@ -1,4 +1,4 @@
-// Generated from E:/Masters/Spring 2025/PLP/Projects/Delphi/src/main/delphi.g4 by ANTLR 4.13.2
+// Generated from E:/Masters/Spring 2025/PLP/Projects/Delphi-interpreter/src/main/delphi.g4 by ANTLR 4.13.2
 
 package org.example.antlr;
 
@@ -54,6 +54,18 @@ public class delphiBaseListener implements delphiListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterInterfaceOrClassDeclarationPart(delphiParser.InterfaceOrClassDeclarationPartContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInterfaceOrClassDeclarationPart(delphiParser.InterfaceOrClassDeclarationPartContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterBlock(delphiParser.BlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -73,6 +85,18 @@ public class delphiBaseListener implements delphiListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitClassBlock(delphiParser.ClassBlockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInterfaceBlock(delphiParser.InterfaceBlockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInterfaceBlock(delphiParser.InterfaceBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -594,6 +618,18 @@ public class delphiBaseListener implements delphiListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterInterfaceVariableDeclarationPart(delphiParser.InterfaceVariableDeclarationPartContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInterfaceVariableDeclarationPart(delphiParser.InterfaceVariableDeclarationPartContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterProcedureAndFunctionDeclarationPart(delphiParser.ProcedureAndFunctionDeclarationPartContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -613,6 +649,18 @@ public class delphiBaseListener implements delphiListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitClassProcedureAndFunctionDeclarationPart(delphiParser.ClassProcedureAndFunctionDeclarationPartContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInterfaceProcedureAndFunctionDeclarationPart(delphiParser.InterfaceProcedureAndFunctionDeclarationPartContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInterfaceProcedureAndFunctionDeclarationPart(delphiParser.InterfaceProcedureAndFunctionDeclarationPartContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -642,6 +690,18 @@ public class delphiBaseListener implements delphiListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterInterfaceProcedureAndFunctionDeclaration(delphiParser.InterfaceProcedureAndFunctionDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInterfaceProcedureAndFunctionDeclaration(delphiParser.InterfaceProcedureAndFunctionDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterProcedureDeclaration(delphiParser.ProcedureDeclarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -661,6 +721,18 @@ public class delphiBaseListener implements delphiListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitClassProcedureDeclaration(delphiParser.ClassProcedureDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInterfaceProcedureDeclaration(delphiParser.InterfaceProcedureDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInterfaceProcedureDeclaration(delphiParser.InterfaceProcedureDeclarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -750,6 +822,18 @@ public class delphiBaseListener implements delphiListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterInterfaceFunctionDeclaration(delphiParser.InterfaceFunctionDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInterfaceFunctionDeclaration(delphiParser.InterfaceFunctionDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterMethodImplementation(delphiParser.MethodImplementationContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -817,6 +901,18 @@ public class delphiBaseListener implements delphiListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitClassDeclarationPart(delphiParser.ClassDeclarationPartContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInterfaceDeclarationPart(delphiParser.InterfaceDeclarationPartContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInterfaceDeclarationPart(delphiParser.InterfaceDeclarationPartContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
