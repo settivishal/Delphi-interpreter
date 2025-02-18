@@ -3,19 +3,19 @@ program Test;
 class Human:
     public var name: string;
     public var age: integer;
-    public var sex: string;
 
-    public constructor Human(var name: string; var age: integer; var sex: string);
+    public constructor Human(var name: string);
         begin
             name := name;
-            age := age;
-            sex := sex;
         end;
 
 end;
 
 var John: Human;
-
+var age: integer;
 begin
-    John := Human.Create('John', 18, 'M');
+    John := Human.Human('John');
+    age := 18;
+    writeln(age);
+
 end.
