@@ -14,24 +14,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <!-- Add repositories section -->
-<!--    <repositories>-->
-<!--        <repository>-->
-<!--            <id>central</id>-->
-<!--            <name>Maven Central</name>-->
-<!--            <url>https://repo.maven.apache.org/maven2</url>-->
-<!--        </repository>-->
-<!--    </repositories>-->
-
-<!--    &lt;!&ndash; Add pluginRepositories section &ndash;&gt;-->
-<!--    <pluginRepositories>-->
-<!--        <pluginRepository>-->
-<!--            <id>central</id>-->
-<!--            <name>Maven Central</name>-->
-<!--            <url>https://repo.maven.apache.org/maven2</url>-->
-<!--        </pluginRepository>-->
-<!--    </pluginRepositories>-->
-
     <dependencies>
         <dependency>
             <groupId>org.antlr</groupId>
