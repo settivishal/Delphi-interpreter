@@ -1,4 +1,11 @@
 # Delphi - ANTLR4 Grammar
+## Team Members
+**Vishal Karthikeyan Setti** \
+GatorID - 47670880 
+
+**Jaiharishan Arunagiri Veerakumar** \
+GatorID - 62333614 
+
 ## Description 
 This is a Maven-based project named Delphi. It includes an ANTLR dependency for parsing and processing grammar files. The project is configured to compile with Java 23. The project extends Pascal to support object-oriented features like classes, objects, constructors, destructors, and encapsulation.
 
