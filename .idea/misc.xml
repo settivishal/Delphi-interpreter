@@ -6,7 +6,7 @@
         <PerGrammarGenerationSettings>
           <option name="fileName" value="$PROJECT_DIR$/src/main/delphi.g4" />
           <option name="autoGen" value="true" />
-          <option name="outputDir" value="E:\Masters\Spring 2025\PLP\Projects\Delphi\src\main\java\org\example\antlr" />
+          <option name="outputDir" value="E:\Masters\Spring 2025\PLP\Projects\Delphi-interpreter\src\main\java\org\example\antlr" />
           <option name="libDir" value="" />
           <option name="encoding" value="" />
           <option name="pkg" value="" />
