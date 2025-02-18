@@ -81,7 +81,7 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         String className = ctx.identifier().getText();
         currentClass = new ClassImplementation(className);
         classes.put(className, currentClass);
-        System.out.println("Class: " + className + ", details: " + currentClass);
+        System.out.println("Class: " + className);
         visit(ctx.classBlock());
         currentClass = null;
         return null;
@@ -102,6 +102,14 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
             }
         }
 
+        if (ctx.classProcedureAndFunctionDeclarationPart() != null) {
+            for (delphiParser.ClassProcedureAndFunctionDeclarationPartContext procCtx: ctx.classProcedureAndFunctionDeclarationPart()) {
+                if (procCtx != null) {
+                    visit(procCtx);
+                }
+            }
+        }
+
         return null;
     }
 
@@ -110,13 +118,14 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
 //        visit(ctx.visibility());
 
         String input = ctx.getChild(2).getText();
+
         String[] parts = input.split(":");
 
         String name = parts[0]; // "size"
         String type = parts[1]; // "integer"
+        String visibility = ctx.getChild(0).getText();
 
-        System.out.println("class variable name "+name);
-        System.out.println("class variable type "+type);
+        System.out.println("class variable name: " + name + " type: "+type + " visibility: " + visibility);
 
         currentVariable = new VariableImplementation(name, type);
         currentVisibility = ctx.getChild(0).getText();
@@ -125,11 +134,16 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         // add to the hashmap
         variables.put(currentVariable.name, currentVariable);
 
+        String newName = currentClass.name + "." + currentVariable.name;
+
+        if (visibility.equals("public")) {
+            variables.put(newName, new VariableImplementation(newName, type));
+        }
+
         return super.visitClassVariableDeclarationPart(ctx);
     }
 
     public Object visitVariableDeclarationPart(delphiParser.VariableDeclarationPartContext ctx) {
-
 
         String input = ctx.getChild(1).getText();
         String[] parts = input.split(":");
@@ -137,8 +151,7 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         String name = parts[0];
         String type = parts[1];
 
-        System.out.println("variable name "+name);
-        System.out.println("variable type "+type);
+        System.out.println("variable name: " + name + " type: " + type);
 
         currentVariable = new VariableImplementation(name, type);
 
@@ -159,7 +172,7 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     @Override
     public Void visitVisibility(delphiParser.VisibilityContext ctx) {
         currentVisibility = ctx.getChild(0).getText().toLowerCase();
-        System.out.println("Current visibility: " + currentVisibility);
+//        System.out.println("Current visibility: " + currentVisibility);
         return null;
     }
 
@@ -182,6 +195,28 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     }
 
     @Override
+    public Object visitClassFunctionDeclaration(delphiParser.ClassFunctionDeclarationContext ctx) {
+        String input = ctx.getText();
+        Pattern pattern = Pattern.compile("function(\\w+):(\\w+);");
+        Matcher matcher = pattern.matcher(input);
+
+        if (matcher.find()) {
+            // Extract function name and return type
+            String functionName = matcher.group(1); // Matches the function name (e.g., getPrice)
+            String returnType = matcher.group(2);  // Matches the return type (e.g., integer)
+
+            // Print extracted values
+            System.out.println("Function Name: " + functionName + " Return Type: " + returnType);
+        } else {
+            System.out.println("No matching function found in the input string.");
+        }
+
+
+
+        return super.visitClassFunctionDeclaration(ctx);
+    }
+
+    @Override
     public Object visitProcedureStatement(delphiParser.ProcedureStatementContext ctx) {
         if (ctx.getText().contains("writeln")) {
             String input = ctx.getText();
@@ -192,11 +227,9 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
 
             if (matcher.find()) {
                 value = matcher.group(1); // Extracts the content inside "()"
-                System.out.println("Value inside the brackets: " + value);
             } else {
                 System.out.println("No brackets or value found in the input string");
             }
-
 
             // Case 1: If the value is enclosed in single quotes '...'
             if (value.startsWith("'") && value.endsWith("'")) {

@@ -1,6 +1,9 @@
 Program Test;
 
 class Car:
+
+    private var size: integer;
+
     public constructor Car(var y: integer);
         begin
             y := 1;
@@ -10,16 +13,7 @@ class Car:
         begin
             writeln('destructor');
         end;
-    private var size: integer;
-    public function myFunction(var x: integer): integer ;
-        begin
-            x := 1;
-        end;
 
-    public procedure myProcedure(var x: integer);
-        begin
-            x := 1
-        end;
 end;
 
 var myCar: Car;
@@ -29,9 +23,7 @@ var b: integer;
 
 begin
     myCar := Car.Car(1);
-    z := myCar.myFunction(5);
     myCar.size := 5;
-    myCar.myProcedure(1);
     myCar.Desc;
 
     a := 10;
