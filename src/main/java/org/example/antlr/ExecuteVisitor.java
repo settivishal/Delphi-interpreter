@@ -371,5 +371,17 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         }
         return null;
     }
+
+    // Implement visitor for CONTINUE statement
+    @Override
+    public Object visitContinueStatement(delphiParser.ContinueStatementContext ctx) {
+        if (inLoop) {
+            System.out.println("CONTINUE statement encountered");
+            throw new ContinueException();
+        } else {
+            System.out.println("ERROR: CONTINUE statement outside of loop context");
+        }
+        return null;
+    }
 }
 
