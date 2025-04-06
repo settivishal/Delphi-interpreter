@@ -268,6 +268,9 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
 
             if (variables.containsKey(variable)) {
                 currentVariable = variables.get(variable);
+            }else {
+                currentVariable = new VariableImplementation(variable, "String");
+                variables.put(variable, currentVariable);
             }
 
             // If the assignment is to a function call inside the Class or Constructor
@@ -372,10 +375,12 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         return visitChildren(ctx);
     }
 
+    @Override
     public Object visitForStatement(delphiParser.ForStatementContext ctx) {
 //        split the for and then variable should be the next and the start value and end value
         // store the variable value and print out writeln everytime - implement for loop here in java
 
+        System.out.println("Block Scope Created - For Loop");
         String input = ctx.getText();
 
         // regex
@@ -418,7 +423,10 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         return visitChildren(ctx);
     }
 
+    @Override
     public Object visitWhileStatement(delphiParser.WhileStatementContext ctx) {
+        System.out.println("Block Scope Created - While Loop");
+
         String input = ctx.getText();
 
         // Regular expression to extract 'while' components

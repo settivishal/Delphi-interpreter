@@ -7,8 +7,10 @@ BEGIN
     for y:=1 to 10 do
 
     BEGIN
-        x := x + 2
-        writeln(y);
+        j := 'hello';
+        x := x + 2;
+        writeln(x);
+        writeln(j);
     END;
 
 END.

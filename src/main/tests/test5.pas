@@ -12,8 +12,9 @@ Class Mobile:
 
     function getPrice: integer;
         begin
+            price := 100;
+            price := price + 100;
             writeln(price);
-            getPrice := price;
         end;
 
 end;
