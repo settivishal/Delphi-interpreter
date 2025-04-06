@@ -378,6 +378,8 @@ simpleStatement
     | assignmentStatement
     | procedureStatement
     | gotoStatement
+    | breakStatement
+    | continueStatement
     | emptyStatement_
     ;
 
