@@ -250,7 +250,10 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                 System.out.println("Error: variable " + value + " does not exist");
             }
 
-            System.out.println("value in writeln: " + value);
+            if (value != null) {
+                System.out.println("value in writeln: " + value);
+
+            }
         }
 
         return visitChildren(ctx);
@@ -311,4 +314,51 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
 
         return visitChildren(ctx);
     }
+
+    public Object visitForStatement(delphiParser.ForStatementContext ctx) {
+//        split the for and then variable should be the next and the start value and end value
+        // store the variable value and print out writeln everytime - implement for loop here in java
+
+        String input = ctx.getText();
+
+        // regex
+        String regex = "(for)([a-zA-Z])\\s*:=\\s*(\\d+)\\s*to\\s*(\\d+)";
+
+        // Compile the pattern
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+
+        // Check if the pattern matches
+        if (matcher.find()) {
+            // Extract the components
+            String identifier = matcher.group(1);  // "for"
+            String variableName = matcher.group(2);  // "y"
+            int startValue = Integer.parseInt(matcher.group(3));  // 1
+            int endValue = Integer.parseInt(matcher.group(4));  // 10
+
+            // set currentVariable to y
+            if (variables.containsKey(variableName)) {
+                currentVariable = variables.get(variableName);
+            }
+
+            System.out.println(currentVariable.name);
+
+            for (int i = startValue; i < endValue; i++) {
+                currentVariable.setValue(String.valueOf(i));
+                System.out.println("value in writeln: " + currentVariable.value);
+            }
+
+            currentVariable.setValue(null);
+            // Print the results
+            System.out.println("Identifier: " + identifier);
+            System.out.println("Variable Name: " + variableName);
+            System.out.println("Start Value: " + startValue);
+            System.out.println("End Value: " + endValue);
+        } else {
+            System.out.println("Pattern not found in the input string.");
+        }
+
+        return visitChildren(ctx);
+    }
 }
+
