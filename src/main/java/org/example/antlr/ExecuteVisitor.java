@@ -284,7 +284,6 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                 System.out.println("Object: " + currentObject.classInfo.name + " Constructor: " + constructorName + " Passed value: " + passedValue);
 
                 return visitChildren(ctx);
-
             }
 
 
@@ -316,7 +315,7 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     }
 
     public Object visitForStatement(delphiParser.ForStatementContext ctx) {
-//        split the for and then variable should be the next and the start value and end value
+        // split the for and then variable should be the next and the start value and end value
         // store the variable value and print out writeln everytime - implement for loop here in java
 
         String input = ctx.getText();
@@ -359,6 +358,18 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         }
 
         return visitChildren(ctx);
+    }
+
+    // Implement visitor for BREAK statement
+    @Override
+    public Object visitBreakStatement(delphiParser.BreakStatementContext ctx) {
+        if (inLoop) {
+            System.out.println("BREAK statement encountered");
+            throw new BreakException();
+        } else {
+            System.out.println("ERROR: BREAK statement outside of loop context");
+        }
+        return null;
     }
 }
 
