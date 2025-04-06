@@ -919,3 +919,11 @@ NUM_REAL
 fragment EXPONENT
     : ('E') ('+' | '-')? ('0' .. '9')+
     ;
+
+BREAK
+    : 'BREAK'
+    ;
+
+CONTINUE
+    : 'CONTINUE'
+    ;
