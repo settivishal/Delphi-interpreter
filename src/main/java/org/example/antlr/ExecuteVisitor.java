@@ -332,7 +332,7 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                     currentVariable.setValue(String.valueOf(leftSideValue / rightSideValue));
                 }
 
-                System.out.println(currentVariable.value);
+//                System.out.println(currentVariable.value);
 
                 // Print the results
                 System.out.println("Left Side: " + leftSide);
@@ -340,8 +340,6 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                 System.out.println("Right Side: " + rightSide);
 
                 return visitChildren(ctx);
-            } else {
-                System.out.println("Invalid expression format.");
             }
 
 
@@ -400,7 +398,7 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                 currentVariable = variables.get(variableName);
             }
 
-            System.out.println(currentVariable.name);
+//            System.out.println(currentVariable.name);
 
             for (int i = startValue; i < endValue; i++) {
                 currentVariable.setValue(String.valueOf(i));
@@ -421,7 +419,64 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     }
 
     public Object visitWhileStatement(delphiParser.WhileStatementContext ctx) {
-        System.out.println(ctx.getText());
+        String input = ctx.getText();
+
+        // Regular expression to extract 'while' components
+        String regexWhile = "(while)([a-zA-Z]+)([<>])(\\d+)";
+
+        // Regular expression to find where the iterator is incremented
+        String regexIncrement = "([a-zA-Z]+)\\s*:=\\s*\\1\\s*([+\\-])\\s*(\\d+)";
+
+        // Compile patterns
+        Pattern patternWhile = Pattern.compile(regexWhile);
+        Pattern patternIncrement = Pattern.compile(regexIncrement);
+
+        // Match 'while' components
+        Matcher matcherWhile = patternWhile.matcher(input);
+
+        if (matcherWhile.find()) {
+            // Extract 'while' components
+            String identifier = matcherWhile.group(1);  // "while"
+            String iterator = matcherWhile.group(2);   // "x"
+            String comparator = matcherWhile.group(3); // "<"
+            int endValue = Integer.parseInt(matcherWhile.group(4)); // 5
+
+            if (variables.containsKey(iterator)) {
+                currentVariable = variables.get(iterator);
+            }
+
+            // Print 'while' results
+            System.out.println("Identifier: " + identifier);
+            System.out.println("Iterator: " + iterator);
+            System.out.println("Comparator: " + comparator);
+            System.out.println("End Value: " + endValue);
+
+            // Match increment details
+            Matcher matcherIncrement = patternIncrement.matcher(input);
+            if (matcherIncrement.find()) {
+                String incrementVariable = matcherIncrement.group(1);  // "x"
+                String operator = matcherIncrement.group(2);           // "+"
+                int incrementValue = Integer.parseInt(matcherIncrement.group(3)); // 1
+
+                int i = Integer.parseInt(currentVariable.value);
+
+                while (i < endValue) {
+                    i = i + incrementValue;
+                    currentVariable.setValue(String.valueOf(i));
+                    System.out.println("value in writeln " + i);
+                }
+
+                // Print increment details
+                System.out.println("Increment Variable: " + incrementVariable);
+                System.out.println("Increment Operator: " + operator);
+                System.out.println("Increment Value: " + incrementValue);
+            } else {
+                System.out.println("No increment operation found.");
+            }
+        } else {
+            System.out.println("Pattern not found in the input string.");
+        }
+
 
         return visitChildren(ctx);
     }
