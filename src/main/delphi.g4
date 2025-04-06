@@ -498,6 +498,14 @@ gotoStatement
     : GOTO label
     ;
 
+breakStatement
+    : BREAK
+    ;
+
+continueStatement
+    : CONTINUE
+    ;
+
 emptyStatement_
     :
     ;
