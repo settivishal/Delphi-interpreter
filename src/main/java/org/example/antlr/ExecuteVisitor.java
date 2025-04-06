@@ -479,5 +479,29 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
 
         return visitChildren(ctx);
     }
+
+    // Implement visitor for BREAK statement
+    @Override
+    public Object visitBreakStatement(delphiParser.BreakStatementContext ctx) {
+        if (inLoop) {
+            System.out.println("BREAK statement encountered");
+            throw new BreakException();
+        } else {
+            System.out.println("ERROR: BREAK statement outside of loop context");
+        }
+        return null;
+    }
+
+    // Implement visitor for CONTINUE statement
+    @Override
+    public Object visitContinueStatement(delphiParser.ContinueStatementContext ctx) {
+        if (inLoop) {
+            System.out.println("CONTINUE statement encountered");
+            throw new ContinueException();
+        } else {
+            System.out.println("ERROR: CONTINUE statement outside of loop context");
+        }
+        return null;
+    }
 }
 
