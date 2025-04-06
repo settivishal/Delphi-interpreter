@@ -371,6 +371,7 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         return visitChildren(ctx);
     }
 
+    @Override
     public Object visitForStatement(delphiParser.ForStatementContext ctx) {
         // split the for and then variable should be the next and the start value and end value
         // store the variable value and print out writeln everytime - implement for loop here in java
@@ -417,6 +418,7 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         return visitChildren(ctx);
     }
 
+    @Override
     public Object visitWhileStatement(delphiParser.WhileStatementContext ctx) {
         String input = ctx.getText();
 
