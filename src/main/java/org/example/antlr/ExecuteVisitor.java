@@ -286,6 +286,63 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                 return visitChildren(ctx);
             }
 
+            // Addition, Sub, Multi, Div
+
+            // Regular expression to match the format: LHS operator RHS
+            String regex = "([a-zA-Z0-9]+)\\s*([+\\-*/])\\s*([a-zA-Z0-9]+)";
+
+            // Compile the pattern
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(value);
+
+            // Check if the pattern matches
+            if (matcher.find()) {
+                // Extract the components
+                String leftSide = matcher.group(1);  // LHS (e.g., "x")
+                String operator = matcher.group(2); // Operator (e.g., "+")
+                String rightSide = matcher.group(3); // RHS (e.g., "1")
+
+                int leftSideValue;
+                if (variables.containsKey(leftSide)) {
+                    leftSideValue = Integer.parseInt(variables.get(leftSide).value);
+                }
+                else {
+                    leftSideValue = Integer.parseInt(leftSide);
+                }
+
+                int rightSideValue;
+                if (variables.containsKey(rightSide)) {
+                    rightSideValue = Integer.parseInt(variables.get(rightSide).value);
+                }
+                else {
+                    rightSideValue = Integer.parseInt(rightSide);
+                }
+
+                if (operator.equals("+")) {
+                    currentVariable.setValue(String.valueOf(leftSideValue + rightSideValue));
+                }
+                else if (operator.equals("-")) {
+                    currentVariable.setValue(String.valueOf(leftSideValue - rightSideValue));
+                }
+                else if (operator.equals("*")) {
+                    currentVariable.setValue(String.valueOf(leftSideValue * rightSideValue));
+                }
+                else if (operator.equals("/")) {
+                    currentVariable.setValue(String.valueOf(leftSideValue / rightSideValue));
+                }
+
+//                System.out.println(currentVariable.value);
+
+                // Print the results
+                System.out.println("Left Side: " + leftSide);
+                System.out.println("Operator: " + operator);
+                System.out.println("Right Side: " + rightSide);
+
+                return visitChildren(ctx);
+            }
+
+
+            // Assignment to the value or string
 
             // Case 1: If the value is enclosed in single quotes '...'
             if (value.startsWith("'") && value.endsWith("'")) {
@@ -340,7 +397,7 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                 currentVariable = variables.get(variableName);
             }
 
-            System.out.println(currentVariable.name);
+//            System.out.println(currentVariable.name);
 
             for (int i = startValue; i < endValue; i++) {
                 currentVariable.setValue(String.valueOf(i));
@@ -356,6 +413,69 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         } else {
             System.out.println("Pattern not found in the input string.");
         }
+
+        return visitChildren(ctx);
+    }
+
+    public Object visitWhileStatement(delphiParser.WhileStatementContext ctx) {
+        String input = ctx.getText();
+
+        // Regular expression to extract 'while' components
+        String regexWhile = "(while)([a-zA-Z]+)([<>])(\\d+)";
+
+        // Regular expression to find where the iterator is incremented
+        String regexIncrement = "([a-zA-Z]+)\\s*:=\\s*\\1\\s*([+\\-])\\s*(\\d+)";
+
+        // Compile patterns
+        Pattern patternWhile = Pattern.compile(regexWhile);
+        Pattern patternIncrement = Pattern.compile(regexIncrement);
+
+        // Match 'while' components
+        Matcher matcherWhile = patternWhile.matcher(input);
+
+        if (matcherWhile.find()) {
+            // Extract 'while' components
+            String identifier = matcherWhile.group(1);  // "while"
+            String iterator = matcherWhile.group(2);   // "x"
+            String comparator = matcherWhile.group(3); // "<"
+            int endValue = Integer.parseInt(matcherWhile.group(4)); // 5
+
+            if (variables.containsKey(iterator)) {
+                currentVariable = variables.get(iterator);
+            }
+
+            // Print 'while' results
+            System.out.println("Identifier: " + identifier);
+            System.out.println("Iterator: " + iterator);
+            System.out.println("Comparator: " + comparator);
+            System.out.println("End Value: " + endValue);
+
+            // Match increment details
+            Matcher matcherIncrement = patternIncrement.matcher(input);
+            if (matcherIncrement.find()) {
+                String incrementVariable = matcherIncrement.group(1);  // "x"
+                String operator = matcherIncrement.group(2);           // "+"
+                int incrementValue = Integer.parseInt(matcherIncrement.group(3)); // 1
+
+                int i = Integer.parseInt(currentVariable.value);
+
+                while (i < endValue) {
+                    i = i + incrementValue;
+                    currentVariable.setValue(String.valueOf(i));
+                    System.out.println("value in writeln " + i);
+                }
+
+                // Print increment details
+                System.out.println("Increment Variable: " + incrementVariable);
+                System.out.println("Increment Operator: " + operator);
+                System.out.println("Increment Value: " + incrementValue);
+            } else {
+                System.out.println("No increment operation found.");
+            }
+        } else {
+            System.out.println("Pattern not found in the input string.");
+        }
+
 
         return visitChildren(ctx);
     }
