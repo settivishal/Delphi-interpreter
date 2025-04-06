@@ -287,6 +287,65 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
 
             }
 
+            // Addition, Sub, Multi, Div
+
+            // Regular expression to match the format: LHS operator RHS
+            String regex = "([a-zA-Z0-9]+)\\s*([+\\-*/])\\s*([a-zA-Z0-9]+)";
+
+            // Compile the pattern
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(value);
+
+            // Check if the pattern matches
+            if (matcher.find()) {
+                // Extract the components
+                String leftSide = matcher.group(1);  // LHS (e.g., "x")
+                String operator = matcher.group(2); // Operator (e.g., "+")
+                String rightSide = matcher.group(3); // RHS (e.g., "1")
+
+                int leftSideValue;
+                if (variables.containsKey(leftSide)) {
+                    leftSideValue = Integer.parseInt(variables.get(leftSide).value);
+                }
+                else {
+                    leftSideValue = Integer.parseInt(leftSide);
+                }
+
+                int rightSideValue;
+                if (variables.containsKey(rightSide)) {
+                    rightSideValue = Integer.parseInt(variables.get(rightSide).value);
+                }
+                else {
+                    rightSideValue = Integer.parseInt(rightSide);
+                }
+
+                if (operator.equals("+")) {
+                    currentVariable.setValue(String.valueOf(leftSideValue + rightSideValue));
+                }
+                else if (operator.equals("-")) {
+                    currentVariable.setValue(String.valueOf(leftSideValue - rightSideValue));
+                }
+                else if (operator.equals("*")) {
+                    currentVariable.setValue(String.valueOf(leftSideValue * rightSideValue));
+                }
+                else if (operator.equals("/")) {
+                    currentVariable.setValue(String.valueOf(leftSideValue / rightSideValue));
+                }
+
+                System.out.println(currentVariable.value);
+
+                // Print the results
+                System.out.println("Left Side: " + leftSide);
+                System.out.println("Operator: " + operator);
+                System.out.println("Right Side: " + rightSide);
+
+                return visitChildren(ctx);
+            } else {
+                System.out.println("Invalid expression format.");
+            }
+
+
+            // Assignment to the value or string
 
             // Case 1: If the value is enclosed in single quotes '...'
             if (value.startsWith("'") && value.endsWith("'")) {
@@ -357,6 +416,12 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         } else {
             System.out.println("Pattern not found in the input string.");
         }
+
+        return visitChildren(ctx);
+    }
+
+    public Object visitWhileStatement(delphiParser.WhileStatementContext ctx) {
+        System.out.println(ctx.getText());
 
         return visitChildren(ctx);
     }
