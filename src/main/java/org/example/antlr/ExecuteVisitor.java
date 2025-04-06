@@ -43,15 +43,23 @@ class VariableImplementation {
     }
 }
 
+// Custom Exception for handling control flow
+class BreakException extends RuntimeException {
+}
+
+class ContinueException extends RuntimeException {
+}
+
 public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     private ClassImplementation currentClass = null;
-
     private ObjectImplementation currentObject = null;
-
     private VariableImplementation currentVariable = null;
 
     // Default visibility to "PUBLIC"
     private String currentVisibility = "public";
+
+    // Control flow tracking
+    private boolean inLoop = false;
 
     private final Map<String, ClassImplementation> classes = new HashMap<>();
     private final Map<String, ObjectImplementation> objects = new HashMap<>();
@@ -115,8 +123,6 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
 
     @Override
     public Object visitClassVariableDeclarationPart(delphiParser.ClassVariableDeclarationPartContext ctx) {
-//        visit(ctx.visibility());
-
         String input = ctx.getChild(2).getText();
 
         String[] parts = input.split(":");
@@ -144,7 +150,6 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     }
 
     public Object visitVariableDeclarationPart(delphiParser.VariableDeclarationPartContext ctx) {
-
         String input = ctx.getChild(1).getText();
         String[] parts = input.split(":");
 
@@ -167,12 +172,9 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         return super.visitVariableDeclarationPart(ctx);
     }
 
-
-
     @Override
     public Void visitVisibility(delphiParser.VisibilityContext ctx) {
         currentVisibility = ctx.getChild(0).getText().toLowerCase();
-//        System.out.println("Current visibility: " + currentVisibility);
         return null;
     }
 
@@ -210,8 +212,6 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         } else {
             System.out.println("No matching function found in the input string.");
         }
-
-
 
         return super.visitClassFunctionDeclaration(ctx);
     }
