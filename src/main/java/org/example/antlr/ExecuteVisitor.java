@@ -442,8 +442,8 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         String regexIncrement = "([a-zA-Z]+)\\s*:=\\s*\\1\\s*([+\\-])\\s*(\\d+)";
 
         // Compile patterns
-        Pattern patternWhile = Pattern.compile(regexWhile);
-        Pattern patternIncrement = Pattern.compile(regexIncrement);
+        Pattern patternWhile = Pattern.compile(regexWhile, Pattern.CASE_INSENSITIVE);
+        Pattern patternIncrement = Pattern.compile(regexIncrement, Pattern.CASE_INSENSITIVE);
 
         // Match 'while' components
         Matcher matcherWhile = patternWhile.matcher(input);
@@ -475,10 +475,19 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                 int i = Integer.parseInt(currentVariable.value);
 
                 while (i < endValue) {
-                    visitChildren(ctx);
-                    i = i + incrementValue;
+//                    visitChildren(ctx);
                     currentVariable.setValue(String.valueOf(i));
-//                    System.out.println("value in writeln " + i);
+                    try {
+                        visit(ctx.statement());
+                    } catch (BreakException e) {
+                        System.out.println("Breaking loop at x=" + i);
+                        currentVariable.setValue(String.valueOf(i));
+                        break;
+                    } catch (ContinueException e) {
+                        System.out.println("Skipping iteration at x=" + i);
+                        continue;
+                    }
+                    i = i + incrementValue;
                 }
 
                 // Print increment details
