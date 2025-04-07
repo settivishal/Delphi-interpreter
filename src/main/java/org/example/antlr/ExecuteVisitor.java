@@ -398,8 +398,6 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                 currentVariable = variables.get(variableName);
             }
 
-//            System.out.println(currentVariable.name);
-
             for (int i = startValue; i < endValue; i++) {
                 currentVariable.setValue(String.valueOf(i));
                 System.out.println("value in writeln: " + currentVariable.value);
