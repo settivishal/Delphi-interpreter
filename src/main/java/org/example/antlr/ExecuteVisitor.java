@@ -485,38 +485,17 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     // Implement visitor for BREAK statement
     @Override
     public Object visitBreakStatement(delphiParser.BreakStatementContext ctx) {
-        if (inLoop) {
-            System.out.println("BREAK statement encountered");
-            throw new BreakException();
-        } else {
-            System.out.println("ERROR: BREAK statement outside of loop context");
-        }
-        return null;
+        return visitChildren(ctx);
     }
 
     // Implement visitor for CONTINUE statement
     @Override
     public Object visitContinueStatement(delphiParser.ContinueStatementContext ctx) {
-        if (inLoop) {
-            System.out.println("CONTINUE statement encountered");
-            throw new ContinueException();
-        } else {
-            System.out.println("ERROR: CONTINUE statement outside of loop context");
-        }
-        return null;
+        return visitChildren(ctx);
     }
 
     @Override
     public Object visitIfStatement(delphiParser.IfStatementContext ctx) {
-//        if (ctx.getText().contains("=")) {
-//            String str = ctx.getText();
-//            String variable = str.split("=")[0].trim();
-//            String value = str.split("=")[1].trim();
-//
-//            if (variables.containsKey(variable)) {
-//                currentVariable = variables.get(variable);
-//            }
-//        }
         String conditionText = ctx.expression().getText();
 
         if (conditionText.contains("=")) {
@@ -527,21 +506,17 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
             // Handle variable comparison
             if (variables.containsKey(variable)) {
                 String varValue = variables.get(variable).value;
-                System.out.println("varValue :" + varValue);
 
                 // Try to parse the comparison value as integer first
                 try {
-                    int intValue = Integer.parseInt(value);
-//                    if (varValue instanceof Integer) {
-//                        System.out.println("true: " + true);
-//                        boolean condition = ((Integer)varValue).equals(intValue);
-//                        if (condition) {
-//                            return visit(ctx.statement(0));
-//                        } else if (ctx.ELSE() != null) {
-//                            return visit(ctx.statement(1));
-//                        }
-//                        return null;
-//                    }
+                    boolean condition = (varValue.equals(value));
+                    System.out.println("condition: " + condition);
+                    if (condition) {
+                        return visit(ctx.statement(0));
+                    } else if (ctx.ELSE() != null) {
+                        return visit(ctx.statement(1));
+                    }
+                    return null;
                 } catch (NumberFormatException e) {
                     // Not an integer, try other types if needed
                 }
