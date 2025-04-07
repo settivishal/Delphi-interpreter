@@ -43,15 +43,30 @@ class VariableImplementation {
     }
 }
 
+// Custom Exception for handling control flow
+class BreakException extends RuntimeException {
+    public BreakException(String message) {
+        super(message);
+    }
+}
+
+class ContinueException extends RuntimeException {
+    public ContinueException(String message) {
+        super(message);
+    }
+}
+
 public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     private ClassImplementation currentClass = null;
-
     private ObjectImplementation currentObject = null;
-
     private VariableImplementation currentVariable = null;
 
     // Default visibility to "PUBLIC"
     private String currentVisibility = "public";
+
+    // BREAK/CONTINUE
+    private String BREAK = "BREAK";
+    private String CONTINUE = "CONTINUE";
 
     private final Map<String, ClassImplementation> classes = new HashMap<>();
     private final Map<String, ObjectImplementation> objects = new HashMap<>();
@@ -115,8 +130,6 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
 
     @Override
     public Object visitClassVariableDeclarationPart(delphiParser.ClassVariableDeclarationPartContext ctx) {
-//        visit(ctx.visibility());
-
         String input = ctx.getChild(2).getText();
 
         String[] parts = input.split(":");
@@ -144,7 +157,6 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     }
 
     public Object visitVariableDeclarationPart(delphiParser.VariableDeclarationPartContext ctx) {
-
         String input = ctx.getChild(1).getText();
         String[] parts = input.split(":");
 
@@ -167,12 +179,9 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         return super.visitVariableDeclarationPart(ctx);
     }
 
-
-
     @Override
     public Void visitVisibility(delphiParser.VisibilityContext ctx) {
         currentVisibility = ctx.getChild(0).getText().toLowerCase();
-//        System.out.println("Current visibility: " + currentVisibility);
         return null;
     }
 
@@ -210,8 +219,6 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         } else {
             System.out.println("No matching function found in the input string.");
         }
-
-
 
         return super.visitClassFunctionDeclaration(ctx);
     }
@@ -284,7 +291,6 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                 System.out.println("Object: " + currentObject.classInfo.name + " Constructor: " + constructorName + " Passed value: " + passedValue);
 
                 return visitChildren(ctx);
-
             }
 
             // Addition, Sub, Multi, Div
@@ -372,8 +378,9 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         return visitChildren(ctx);
     }
 
+    @Override
     public Object visitForStatement(delphiParser.ForStatementContext ctx) {
-//        split the for and then variable should be the next and the start value and end value
+        // split the for and then variable should be the next and the start value and end value
         // store the variable value and print out writeln everytime - implement for loop here in java
 
         String input = ctx.getText();
@@ -382,7 +389,7 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         String regex = "(for)([a-zA-Z])\\s*:=\\s*(\\d+)\\s*to\\s*(\\d+)";
 
         // Compile the pattern
-        Pattern pattern = Pattern.compile(regex);
+        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(input);
 
         // Check if the pattern matches
@@ -398,14 +405,20 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                 currentVariable = variables.get(variableName);
             }
 
-//            System.out.println(currentVariable.name);
-
             for (int i = startValue; i < endValue; i++) {
                 currentVariable.setValue(String.valueOf(i));
-                System.out.println("value in writeln: " + currentVariable.value);
+                try {
+                    visit(ctx.statement());
+                } catch (BreakException e) {
+                    System.out.println("Breaking loop at x=" + i);
+                    currentVariable.setValue(String.valueOf(i));
+                    break;
+                } catch (ContinueException e) {
+                    System.out.println("Skipping iteration at x=" + i);
+                    continue;
+                }
             }
 
-            currentVariable.setValue(null);
             // Print the results
             System.out.println("Identifier: " + identifier);
             System.out.println("Variable Name: " + variableName);
@@ -415,9 +428,10 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
             System.out.println("Pattern not found in the input string.");
         }
 
-        return visitChildren(ctx);
+        return null;
     }
 
+    @Override
     public Object visitWhileStatement(delphiParser.WhileStatementContext ctx) {
         String input = ctx.getText();
 
@@ -428,8 +442,8 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         String regexIncrement = "([a-zA-Z]+)\\s*:=\\s*\\1\\s*([+\\-])\\s*(\\d+)";
 
         // Compile patterns
-        Pattern patternWhile = Pattern.compile(regexWhile);
-        Pattern patternIncrement = Pattern.compile(regexIncrement);
+        Pattern patternWhile = Pattern.compile(regexWhile, Pattern.CASE_INSENSITIVE);
+        Pattern patternIncrement = Pattern.compile(regexIncrement, Pattern.CASE_INSENSITIVE);
 
         // Match 'while' components
         Matcher matcherWhile = patternWhile.matcher(input);
@@ -461,9 +475,19 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                 int i = Integer.parseInt(currentVariable.value);
 
                 while (i < endValue) {
-                    i = i + incrementValue;
+//                    visitChildren(ctx);
                     currentVariable.setValue(String.valueOf(i));
-                    System.out.println("value in writeln " + i);
+                    try {
+                        visit(ctx.statement());
+                    } catch (BreakException e) {
+                        System.out.println("Breaking loop at x=" + i);
+                        currentVariable.setValue(String.valueOf(i));
+                        break;
+                    } catch (ContinueException e) {
+                        System.out.println("Skipping iteration at x=" + i);
+                        continue;
+                    }
+                    i = i + incrementValue;
                 }
 
                 // Print increment details
@@ -478,7 +502,45 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         }
 
 
-        return visitChildren(ctx);
+        return null;
+    }
+
+    @Override
+    public Object visitIfStatement(delphiParser.IfStatementContext ctx) {
+        String conditionText = ctx.expression().getText();
+
+        if (conditionText.contains("=")) {
+            String[] parts = conditionText.split("=");
+            String variable = parts[0].trim();
+            String value = parts[1].trim();
+
+            // Handle variable comparison
+            if (variables.containsKey(variable)) {
+                String varValue = variables.get(variable).value;
+
+                // Try to parse the comparison value as integer first
+                try {
+                    boolean condition = (varValue.equals(value));
+                    if (condition) {
+                        Object result = visit(ctx.statement(0));
+                        String keyword = ctx.statement(0).getText();
+                        if (keyword.equals(BREAK)) {
+                            throw new BreakException("BREAK");
+                        } else if (keyword.equals(CONTINUE)) {
+                            throw new ContinueException("CONTINUE");
+                        }
+                        return result;
+                    } else if (ctx.ELSE() != null) {
+                        return visit(ctx.statement(1));
+                    }
+                    return null;
+                } catch (NumberFormatException e) {
+                    // Not an integer, try other types if needed
+                }
+            }
+        }
+
+        return super.visitIfStatement(ctx);
     }
 }
 

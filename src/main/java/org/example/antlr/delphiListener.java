@@ -1010,6 +1010,26 @@ public interface delphiListener extends ParseTreeListener {
 	 */
 	void exitGotoStatement(delphiParser.GotoStatementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link delphiParser#breakStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterBreakStatement(delphiParser.BreakStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link delphiParser#breakStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitBreakStatement(delphiParser.BreakStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link delphiParser#continueStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterContinueStatement(delphiParser.ContinueStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link delphiParser#continueStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitContinueStatement(delphiParser.ContinueStatementContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link delphiParser#emptyStatement_}.
 	 * @param ctx the parse tree
 	 */

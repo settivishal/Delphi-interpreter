@@ -378,6 +378,8 @@ simpleStatement
     | assignmentStatement
     | procedureStatement
     | gotoStatement
+    | breakStatement
+    | continueStatement
     | emptyStatement_
     ;
 
@@ -496,6 +498,14 @@ parameterwidth
 
 gotoStatement
     : GOTO label
+    ;
+
+breakStatement
+    : BREAK
+    ;
+
+continueStatement
+    : CONTINUE
     ;
 
 emptyStatement_
@@ -918,4 +928,12 @@ NUM_REAL
 
 fragment EXPONENT
     : ('E') ('+' | '-')? ('0' .. '9')+
+    ;
+
+BREAK
+    : 'BREAK'
+    ;
+
+CONTINUE
+    : 'CONTINUE'
     ;
