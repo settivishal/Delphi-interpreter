@@ -7,7 +7,7 @@ BEGIN
     while x < 8 do
 
     begin
-        x := x + 1;
+        x := x + 2;
         writeln(x);
     end;
 

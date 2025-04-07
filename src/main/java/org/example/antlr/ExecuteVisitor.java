@@ -400,10 +400,11 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
 
             for (int i = startValue; i < endValue; i++) {
                 currentVariable.setValue(String.valueOf(i));
-                System.out.println("value in writeln: " + currentVariable.value);
+                visitChildren(ctx);
+//                System.out.println("value in writeln: " + currentVariable.value);
             }
 
-            currentVariable.setValue(null);
+//            currentVariable.setValue(null);
             // Print the results
             System.out.println("Identifier: " + identifier);
             System.out.println("Variable Name: " + variableName);
@@ -413,7 +414,7 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
             System.out.println("Pattern not found in the input string.");
         }
 
-        return visitChildren(ctx);
+        return null;
     }
 
     @Override
@@ -460,9 +461,10 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                 int i = Integer.parseInt(currentVariable.value);
 
                 while (i < endValue) {
+                    visitChildren(ctx);
                     i = i + incrementValue;
                     currentVariable.setValue(String.valueOf(i));
-                    System.out.println("value in writeln " + i);
+//                    System.out.println("value in writeln " + i);
                 }
 
                 // Print increment details
@@ -477,7 +479,7 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         }
 
 
-        return visitChildren(ctx);
+        return null;
     }
 
     // Implement visitor for BREAK statement
@@ -502,6 +504,51 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
             System.out.println("ERROR: CONTINUE statement outside of loop context");
         }
         return null;
+    }
+
+    @Override
+    public Object visitIfStatement(delphiParser.IfStatementContext ctx) {
+//        if (ctx.getText().contains("=")) {
+//            String str = ctx.getText();
+//            String variable = str.split("=")[0].trim();
+//            String value = str.split("=")[1].trim();
+//
+//            if (variables.containsKey(variable)) {
+//                currentVariable = variables.get(variable);
+//            }
+//        }
+        String conditionText = ctx.expression().getText();
+
+        if (conditionText.contains("=")) {
+            String[] parts = conditionText.split("=");
+            String variable = parts[0].trim();
+            String value = parts[1].trim();
+
+            // Handle variable comparison
+            if (variables.containsKey(variable)) {
+                String varValue = variables.get(variable).value;
+                System.out.println("varValue :" + varValue);
+
+                // Try to parse the comparison value as integer first
+                try {
+                    int intValue = Integer.parseInt(value);
+//                    if (varValue instanceof Integer) {
+//                        System.out.println("true: " + true);
+//                        boolean condition = ((Integer)varValue).equals(intValue);
+//                        if (condition) {
+//                            return visit(ctx.statement(0));
+//                        } else if (ctx.ELSE() != null) {
+//                            return visit(ctx.statement(1));
+//                        }
+//                        return null;
+//                    }
+                } catch (NumberFormatException e) {
+                    // Not an integer, try other types if needed
+                }
+            }
+        }
+
+        return super.visitIfStatement(ctx);
     }
 }
 

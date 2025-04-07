@@ -2,13 +2,11 @@ PROGRAM Test;
 VAR y: INTEGER;
 VAR x: INTEGER;
 BEGIN
-    x := 0;
-
     for y:=1 to 10 do
+        BEGIN
+            writeln(y);
+        END;
 
-    BEGIN
-        x := x + 2
-        writeln(y);
-    END;
-
+    x := 10 + y;
+    writeln(x);
 END.
