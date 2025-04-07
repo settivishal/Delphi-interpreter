@@ -269,6 +269,7 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
             if (variables.containsKey(variable)) {
                 currentVariable = variables.get(variable);
             }else {
+                System.out.println(ctx.getParent().getText());
                 currentVariable = new VariableImplementation(variable, "String");
                 variables.put(variable, currentVariable);
             }
