@@ -65,8 +65,8 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     private String currentVisibility = "public";
 
     // BREAK/CONTINUE
-    private String BREAK = "BREAK";
-    private String CONTINUE = "CONTINUE";
+    private final String BREAK = "BREAK";
+    private final String CONTINUE = "CONTINUE";
 
     private final Map<String, ClassImplementation> classes = new HashMap<>();
     private final Map<String, ObjectImplementation> objects = new HashMap<>();
@@ -156,6 +156,7 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         return super.visitClassVariableDeclarationPart(ctx);
     }
 
+    @Override
     public Object visitVariableDeclarationPart(delphiParser.VariableDeclarationPartContext ctx) {
         String input = ctx.getChild(1).getText();
         String[] parts = input.split(":");
