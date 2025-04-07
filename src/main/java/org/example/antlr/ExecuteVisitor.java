@@ -45,9 +45,15 @@ class VariableImplementation {
 
 // Custom Exception for handling control flow
 class BreakException extends RuntimeException {
+    public BreakException(String message) {
+        super(message);
+    }
 }
 
 class ContinueException extends RuntimeException {
+    public ContinueException(String message) {
+        super(message);
+    }
 }
 
 public class ExecuteVisitor extends delphiBaseVisitor<Object>{
@@ -57,9 +63,6 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
 
     // Default visibility to "PUBLIC"
     private String currentVisibility = "public";
-
-    // Control flow tracking
-    private boolean inLoop = false;
 
     private final Map<String, ClassImplementation> classes = new HashMap<>();
     private final Map<String, ObjectImplementation> objects = new HashMap<>();
@@ -382,7 +385,7 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         String regex = "(for)([a-zA-Z])\\s*:=\\s*(\\d+)\\s*to\\s*(\\d+)";
 
         // Compile the pattern
-        Pattern pattern = Pattern.compile(regex);
+        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(input);
 
         // Check if the pattern matches
@@ -400,8 +403,17 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
 
             for (int i = startValue; i < endValue; i++) {
                 currentVariable.setValue(String.valueOf(i));
-                visitChildren(ctx);
-//                System.out.println("value in writeln: " + currentVariable.value);
+                try {
+//                    visitChildren(ctx);
+                    visit(ctx.statement());
+                } catch (BreakException e) {
+                    System.out.println("Breaking loop at x=" + i);
+                    currentVariable.setValue(String.valueOf(i));
+                    break;
+                } catch (ContinueException e) {
+                    System.out.println("Skipping iteration at x=" + i);
+                    continue;
+                }
             }
 
 //            currentVariable.setValue(null);
@@ -485,7 +497,8 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     // Implement visitor for BREAK statement
     @Override
     public Object visitBreakStatement(delphiParser.BreakStatementContext ctx) {
-        return visitChildren(ctx);
+        System.out.println("BREAK statement executed");  // Debug message
+        throw new BreakException("BREAK!!!");
     }
 
     // Implement visitor for CONTINUE statement
@@ -510,9 +523,15 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                 // Try to parse the comparison value as integer first
                 try {
                     boolean condition = (varValue.equals(value));
-                    System.out.println("condition: " + condition);
                     if (condition) {
-                        return visit(ctx.statement(0));
+                        Object result = visit(ctx.statement(0));
+                        String keyword = ctx.statement(0).getText();
+                        if (keyword.equals("BREAK")) {
+                            throw new BreakException("BREAK!!!");
+                        } else if (keyword.equals("CONTINUE")) {
+                            throw new ContinueException("BREAK!!!");
+                        }
+                        return result;
                     } else if (ctx.ELSE() != null) {
                         return visit(ctx.statement(1));
                     }

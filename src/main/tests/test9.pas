@@ -3,8 +3,8 @@ VAR x: INTEGER;
 BEGIN
     for x:=1 to 10 do
         BEGIN
-            writeln(x);
             IF x = 3 THEN
-                BREAK;
+                CONTINUE;
+            writeln(x);
         END;
 END.
