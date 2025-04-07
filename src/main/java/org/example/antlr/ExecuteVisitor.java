@@ -64,6 +64,10 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
     // Default visibility to "PUBLIC"
     private String currentVisibility = "public";
 
+    // BREAK/CONTINUE
+    private String BREAK = "BREAK";
+    private String CONTINUE = "CONTINUE";
+
     private final Map<String, ClassImplementation> classes = new HashMap<>();
     private final Map<String, ObjectImplementation> objects = new HashMap<>();
     private final Map<String, VariableImplementation> variables = new HashMap<>();
@@ -404,7 +408,6 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
             for (int i = startValue; i < endValue; i++) {
                 currentVariable.setValue(String.valueOf(i));
                 try {
-//                    visitChildren(ctx);
                     visit(ctx.statement());
                 } catch (BreakException e) {
                     System.out.println("Breaking loop at x=" + i);
@@ -416,7 +419,6 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                 }
             }
 
-//            currentVariable.setValue(null);
             // Print the results
             System.out.println("Identifier: " + identifier);
             System.out.println("Variable Name: " + variableName);
@@ -494,19 +496,6 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         return null;
     }
 
-    // Implement visitor for BREAK statement
-    @Override
-    public Object visitBreakStatement(delphiParser.BreakStatementContext ctx) {
-        System.out.println("BREAK statement executed");  // Debug message
-        throw new BreakException("BREAK!!!");
-    }
-
-    // Implement visitor for CONTINUE statement
-    @Override
-    public Object visitContinueStatement(delphiParser.ContinueStatementContext ctx) {
-        return visitChildren(ctx);
-    }
-
     @Override
     public Object visitIfStatement(delphiParser.IfStatementContext ctx) {
         String conditionText = ctx.expression().getText();
@@ -526,10 +515,10 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
                     if (condition) {
                         Object result = visit(ctx.statement(0));
                         String keyword = ctx.statement(0).getText();
-                        if (keyword.equals("BREAK")) {
-                            throw new BreakException("BREAK!!!");
-                        } else if (keyword.equals("CONTINUE")) {
-                            throw new ContinueException("BREAK!!!");
+                        if (keyword.equals(BREAK)) {
+                            throw new BreakException("BREAK");
+                        } else if (keyword.equals(CONTINUE)) {
+                            throw new ContinueException("CONTINUE");
                         }
                         return result;
                     } else if (ctx.ELSE() != null) {
