@@ -2,7 +2,7 @@ program Test;
 
 class Human:
     public var name: string;
-    public var height: integer;
+    public var age: integer;
 
     public constructor Human(var name: string);
         begin
@@ -12,10 +12,7 @@ class Human:
 end;
 
 var John: Human;
-var height: integer;
 begin
     John := Human.Human('John');
-    height := 6;
-    writeln(height);
-
+    writeln(age);
 end.

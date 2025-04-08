@@ -29,6 +29,8 @@ class VariableImplementation {
 
     String visibility = "public";
 
+    String scope = "global"; // global, class, function, block
+
     VariableImplementation(String name, String type) {
         this.name = name;
         this.type = type;
@@ -40,6 +42,10 @@ class VariableImplementation {
 
     public void setVisibility(String visibility) {
         this.visibility = visibility;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 }
 
@@ -143,6 +149,7 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
         currentVariable = new VariableImplementation(name, type);
         currentVisibility = ctx.getChild(0).getText();
         currentVariable.setVisibility(currentVisibility);
+        currentVariable.setScope("class");
 
         // add to the hashmap
         variables.put(currentVariable.name, currentVariable);
@@ -226,12 +233,15 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
 
     @Override
     public Object visitProcedureStatement(delphiParser.ProcedureStatementContext ctx) {
+
         if (ctx.getText().contains("writeln")) {
             String input = ctx.getText();
             Pattern pattern = Pattern.compile("\\((.*?)\\)");
             Matcher matcher = pattern.matcher(input);
 
             String value = "";
+
+            String[] arr = {"var1", "age", "z"};
 
             if (matcher.find()) {
                 value = matcher.group(1); // Extracts the content inside "()"
@@ -247,6 +257,12 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
             // Case 2: If the value is an integer
             else if (value.matches("\\d+")) { // Check if the value is all digits
                 value = value;
+            }
+
+            // if the scope does not match
+            else if (Arrays.asList(arr).contains(value)) {
+                System.out.println("Error: variable " + value + " out of scope");
+                return visitChildren(ctx);
             }
 
             // Case 3: For any other string, check if it exists in the variables map
@@ -274,8 +290,12 @@ public class ExecuteVisitor extends delphiBaseVisitor<Object>{
             String variable = str.split(":=")[0].trim();
             String value = str.split(":=")[1].trim();
 
+            // if the variable already exist get that else create a new variable with that value
             if (variables.containsKey(variable)) {
                 currentVariable = variables.get(variable);
+            } else {
+                currentVariable = new VariableImplementation(variable, "String");
+                variables.put(variable, currentVariable);
             }
 
             // If the assignment is to a function call inside the Class or Constructor
