@@ -44,7 +44,26 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
     // Main Generation Entry Point
     public String generateIR() {
         emitHeader();
+
+        // Emit string literals
+        for (Map.Entry<String, String> entry : stringLiterals.entrySet()) {
+            String escaped = escapeString(entry.getValue());
+            emit(entry.getKey() + " = private unnamed_addr constant [" +
+                    (entry.getValue().length()+1) + " x i8] c\"" + escaped + "\\00\"");
+        }
+        emit("");
+
+        // Emit the rest of the code
         return String.join("\n", irCode);
+    }
+
+    private String escapeString(String str) {
+        // Simple escape for special characters
+        return str.replace("\\", "\\5C")
+                .replace("\n", "\\0A")
+                .replace("\t", "\\09")
+                .replace("\"", "\\22")
+                .replace("'", "\\27");
     }
 
     private void emit(String code) {
@@ -59,12 +78,17 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         return "label" + (++labelCounter);
     }
 
+    private Map<String, String> stringLiterals = new HashMap<>();
+    private int stringLiteralCounter = 0;
+
     private void emitHeader() {
         emit("; LLVM IR for Extended Pascal/Delphi");
         emit("target datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"");
         emit("target triple = \"x86_64-pc-linux-gnu\"");
         emit("declare noalias i8* @malloc(i64)");
         emit("declare void @free(i8*)");
+        emit("declare void @writeln_i32(i32)");  // For integers
+        emit("declare void @writeln_str(i8*)");  // For strings
         emit("");
     }
 
@@ -80,7 +104,7 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
                 if (classInfo.containsKey(pascalType)) {
                     return "%struct." + pascalType + "*";
                 }
-                return "i32"; // default
+                return "i32";
         }
     }
 
@@ -90,13 +114,45 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         emit("; Program: " + ctx.programHeading().identifier().getText());
         visitChildren(ctx);
 
-        // Add main function if not present
+        // Only add main if not already present
         if (!irCode.stream().anyMatch(s -> s.contains("define i32 @main"))) {
-            emit("\ndefine i32 @main() {");
-            emit("  ret i32 0");
-            emit("}");
+            emitMainFunction();
         }
         return null;
+    }
+
+    private void emitMainFunction() {
+        emit("\ndefine i32 @main() {");
+        emit("entry:");
+
+        // Visit all statements in the program block
+        for (String varName : symbolTable.keySet()) {
+            if (!varName.startsWith("%")) {
+                emit("%" + varName + " = alloca " + symbolTable.get(varName));
+                emit("store " + symbolTable.get(varName) + " " +
+                        getDefaultValue(symbolTable.get(varName)) + ", " +
+                        symbolTable.get(varName) + "* %" + varName);
+            }
+        }
+
+        // Move all global statements into main
+        List<String> newIrCode = new ArrayList<>();
+        List<String> mainBody = new ArrayList<>();
+
+        for (String line : irCode) {
+            if (line.startsWith("store") || line.startsWith("%") &&
+                    !line.contains("@")) {
+                mainBody.add(line);
+            } else {
+                newIrCode.add(line);
+            }
+        }
+
+        mainBody.add("ret i32 0");
+        newIrCode.add("}");
+
+        irCode = newIrCode;
+        irCode.addAll(irCode.size() - 1, mainBody);
     }
 
     // Class Support
@@ -400,11 +456,31 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
     // I/O Operations
     @Override
     public Object visitProcedureStatement(delphiParser.ProcedureStatementContext ctx) {
-        if (ctx.getText().startsWith("writeln")) {
-            String arg = ctx.getText().replaceAll(".*\\((.*?)\\).*", "$1");
-            emit("call void @writeln(" + mapType("string") + " " + evaluateRHS(arg, mapType("string")) + ")");
+        if (ctx.getText().toUpperCase().startsWith("WRITELN")) {
+            // Extract the content inside parentheses
+            String content = ctx.getText().substring(ctx.getText().indexOf('(') + 1, ctx.getText().lastIndexOf(')')).trim();
+
+            if (content.startsWith("'") && content.endsWith("'")) {
+                // Handle string literal (Pascal-style single quotes)
+                String strContent = content.substring(1, content.length()-1);
+                String literalName = registerStringLiteral(strContent);
+                String temp = newTemp();
+                emit(temp + " = getelementptr inbounds [" + (strContent.length()+1) +
+                        " x i8], [" + (strContent.length()+1) + " x i8]* " + literalName + ", i64 0, i64 0");
+                emit("call void @writeln_str(i8* " + temp + ")");
+            } else {
+                // Handle integer/expression case
+                String val = evaluateRHS(content, "i32");
+                emit("call void @writeln_i32(i32 " + val + ")");
+            }
         }
         return null;
+    }
+
+    private String registerStringLiteral(String content) {
+        String literalName = "@.str." + (++stringLiteralCounter);
+        stringLiterals.put(literalName, content);
+        return literalName;
     }
 
     // Main Function

@@ -6,5 +6,5 @@ BEGIN
     y := x + 10;
     y := 20 * y;
     x := 200 / 15;
-    writeln(y);
+    writeln('Hello World!');
 END.
