@@ -19,13 +19,13 @@ label2:
 br label %label3
 
 label3:
-call void @writeln_i32(i32 0)
+%3 = load i32, i32* @x
+call void @writeln_i32(i32 %3)
 
 define i32 @main() {
 	entry:
 	%x = alloca i32
 	store i32 0, i32* %x
-	store i32 1, i32* @x
-	%2 = icmp eq i1 %1, 1
+	%2 = icmp eq i1 %1, 3
 	ret i32 0
 }

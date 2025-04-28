@@ -9,7 +9,7 @@ declare void @writeln_str(i8*)
 
 ; Program: Test
 i8* ; name,
-i32 ; height
+i32 ; age
 }
 
 define %struct.Human* @Human_create() {
@@ -19,16 +19,12 @@ ret %struct.Human* %2
 }
 
 @John = global %struct.Human* null
-@height = global i32 0
-%5 = load i32, i32* @height
-call void @writeln_i32(i32 %5)
+call void @writeln_i32(i32 0)
 
 define i32 @main() {
 	entry:
 	%John = alloca %struct.Human*
 	store %struct.Human* null, %struct.Human** %John
-	%height = alloca i32
-	store i32 0, i32* %height
 	%struct.Human = type {
 	%2 = bitcast i8* %1 to %struct.Human*
 	%3 = getelementptr %struct.Human, %struct.Human* %2, i32 0, i32 0
@@ -36,6 +32,5 @@ define i32 @main() {
 	%4 = getelementptr %struct.Human, %struct.Human* %2, i32 0, i32 1
 	store i32 0, i32* %4
 	store %struct.Human* null, %struct.Human** @John
-	store i32 6, i32* @height
 	ret i32 0
 }

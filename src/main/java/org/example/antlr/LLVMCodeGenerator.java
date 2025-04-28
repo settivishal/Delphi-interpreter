@@ -43,18 +43,31 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
 
     // Main Generation Entry Point
     public String generateIR() {
-        emitHeader();
+        // Create a new list to hold the final IR
+        List<String> finalIR = new ArrayList<>();
 
-        // Emit string literals
+        // 1. Add header first
+        finalIR.add("; LLVM IR for Extended Pascal/Delphi");
+        finalIR.add("target datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"");
+        finalIR.add("target triple = \"x86_64-pc-linux-gnu\"");
+        finalIR.add("declare noalias i8* @malloc(i64)");
+        finalIR.add("declare void @free(i8*)");
+        finalIR.add("declare void @writeln_i32(i32)");
+        finalIR.add("declare void @writeln_str(i8*)");
+        finalIR.add("");
+
+        // 2. Add string literals next
         for (Map.Entry<String, String> entry : stringLiterals.entrySet()) {
             String escaped = escapeString(entry.getValue());
-            emit(entry.getKey() + " = private unnamed_addr constant [" +
+            finalIR.add(entry.getKey() + " = private unnamed_addr constant [" +
                     (entry.getValue().length()+1) + " x i8] c\"" + escaped + "\\00\"");
         }
-        emit("");
+        finalIR.add("");
 
-        // Emit the rest of the code
-        return String.join("\n", irCode);
+        // 3. Add the rest of the generated code
+        finalIR.addAll(irCode);
+
+        return String.join("\n", finalIR);
     }
 
     private String escapeString(String str) {
@@ -123,13 +136,13 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
 
     private void emitMainFunction() {
         emit("\ndefine i32 @main() {");
-        emit(" entry:");
+        emit("\t" + "entry:");
 
         // Visit all statements in the program block
         for (String varName : symbolTable.keySet()) {
             if (!varName.startsWith("%")) {
-                emit(" %" + varName + " = alloca " + symbolTable.get(varName));
-                emit(" store " + symbolTable.get(varName) + " " +
+                emit("\t" + "%" + varName + " = alloca " + symbolTable.get(varName));
+                emit("\t" + "store " + symbolTable.get(varName) + " " +
                         getDefaultValue(symbolTable.get(varName)) + ", " +
                         symbolTable.get(varName) + "* %" + varName);
             }
@@ -142,13 +155,13 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         for (String line : irCode) {
             if (line.startsWith("store") || line.startsWith("%") &&
                     !line.contains("@")) {
-                mainBody.add(" " + line);
+                mainBody.add("\t" + line);
             } else {
                 newIrCode.add(line);
             }
         }
 
-        mainBody.add(" ret i32 0");
+        mainBody.add("\t" + "ret i32 0");
         newIrCode.add("}");
 
         irCode = newIrCode;
@@ -461,7 +474,6 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
             String content = ctx.getText().substring(ctx.getText().indexOf('(') + 1, ctx.getText().lastIndexOf(')')).trim();
 
             if (content.startsWith("'") && content.endsWith("'")) {
-                // Handle string literal (Pascal-style single quotes)
                 String strContent = content.substring(1, content.length()-1);
                 String literalName = registerStringLiteral(strContent);
                 String temp = newTemp();
@@ -469,7 +481,6 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
                         " x i8], [" + (strContent.length()+1) + " x i8]* " + literalName + ", i64 0, i64 0");
                 emit("call void @writeln_str(i8* " + temp + ")");
             } else {
-                // Handle integer/expression case
                 String val = evaluateRHS(content, "i32");
                 emit("call void @writeln_i32(i32 " + val + ")");
             }

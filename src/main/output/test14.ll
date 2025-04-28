@@ -9,7 +9,12 @@ declare void @writeln_str(i8*)
 
 ; Program: Test
 i8* ; name,
-i32 ; height
+i32 ; age
+define integer @Human_doStuff(%struct.Human* %this) {
+entry:
+ret integer null
+}
+
 }
 
 define %struct.Human* @Human_create() {
@@ -20,13 +25,26 @@ ret %struct.Human* %2
 
 @John = global %struct.Human* null
 @height = global i32 0
-%5 = load i32, i32* @height
-call void @writeln_i32(i32 %5)
+@x = global i32 0
+%5 = load i1, i1* @x
+br i1 %6, label %label1, label %label2
+
+label1:
+br label %label3
+
+label2:
+br label %label3
+
+label3:
+call void @writeln_i32(i32 0)
+call void @writeln_i32(i32 0)
 
 define i32 @main() {
 	entry:
 	%John = alloca %struct.Human*
 	store %struct.Human* null, %struct.Human** %John
+	%x = alloca i32
+	store i32 0, i32* %x
 	%height = alloca i32
 	store i32 0, i32* %height
 	%struct.Human = type {
@@ -36,6 +54,6 @@ define i32 @main() {
 	%4 = getelementptr %struct.Human, %struct.Human* %2, i32 0, i32 1
 	store i32 0, i32* %4
 	store %struct.Human* null, %struct.Human** @John
-	store i32 6, i32* @height
+	%6 = icmp eq i1 %5, 3
 	ret i32 0
 }

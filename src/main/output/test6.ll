@@ -8,24 +8,21 @@ declare void @writeln_str(i8*)
 
 
 ; Program: Test
+@y = global i32 0
 @x = global i32 0
-%1 = load i1, i1* @x
-br i1 %2, label %label1, label %label2
-
-label1:
-br label %label3
-
-label2:
-br label %label3
-
-label3:
-call void @writeln_i32(i32 0)
+%1 = load i32, i32* @y
+call void @writeln_i32(i32 %1)
+%2 = load i32, i32* @y
+%4 = load i32, i32* @x
+call void @writeln_i32(i32 %4)
 
 define i32 @main() {
 	entry:
 	%x = alloca i32
 	store i32 0, i32* %x
-	store i32 1, i32* @x
-	%2 = icmp eq i1 %1, 1
+	%y = alloca i32
+	store i32 0, i32* %y
+	%3 = add i32 10, %2
+	store i32 %3, i32* @x
 	ret i32 0
 }
