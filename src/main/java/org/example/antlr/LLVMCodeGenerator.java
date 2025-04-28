@@ -495,31 +495,31 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
     }
 
     // Main Function
-    public static void main(String[] args) {
-        try {
-            // Read input file
-            String inputFile = args.length > 0 ? args[0] : "input.pas";
-            String pascalCode = new String(Files.readAllBytes(Paths.get(inputFile)));
-
-            // Parse
-            delphiLexer lexer = new delphiLexer(CharStreams.fromString(pascalCode));
-            delphiParser parser = new delphiParser(new CommonTokenStream(lexer));
-            ParseTree tree = parser.program();
-
-            // Generate LLVM IR
-            LLVMCodeGenerator generator = new LLVMCodeGenerator();
-            generator.visit(tree);
-            String llvmIR = generator.generateIR();
-
-            // Write output
-            String outputFile = args.length > 1 ? args[1] : "output.ll";
-            Files.write(Paths.get(outputFile), llvmIR.getBytes());
-
-            System.out.println("Successfully generated LLVM IR: " + outputFile);
-        } catch (Exception e) {
-            System.err.println("Error during compilation:");
-            e.printStackTrace();
-            System.exit(1);
-        }
-    }
+//    public static void main(String[] args) {
+//        try {
+//            // Read input file
+//            String inputFile = args.length > 0 ? args[0] : "input.pas";
+//            String pascalCode = new String(Files.readAllBytes(Paths.get(inputFile)));
+//
+//            // Parse
+//            delphiLexer lexer = new delphiLexer(CharStreams.fromString(pascalCode));
+//            delphiParser parser = new delphiParser(new CommonTokenStream(lexer));
+//            ParseTree tree = parser.program();
+//
+//            // Generate LLVM IR
+//            LLVMCodeGenerator generator = new LLVMCodeGenerator();
+//            generator.visit(tree);
+//            String llvmIR = generator.generateIR();
+//
+//            // Write output
+//            String outputFile = args.length > 1 ? args[1] : "output.ll";
+//            Files.write(Paths.get(outputFile), llvmIR.getBytes());
+//
+//            System.out.println("Successfully generated LLVM IR: " + outputFile);
+//        } catch (Exception e) {
+//            System.err.println("Error during compilation:");
+//            e.printStackTrace();
+//            System.exit(1);
+//        }
+//    }
 }
