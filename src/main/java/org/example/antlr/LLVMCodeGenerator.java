@@ -123,13 +123,13 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
 
     private void emitMainFunction() {
         emit("\ndefine i32 @main() {");
-        emit("entry:");
+        emit(" entry:");
 
         // Visit all statements in the program block
         for (String varName : symbolTable.keySet()) {
             if (!varName.startsWith("%")) {
-                emit("%" + varName + " = alloca " + symbolTable.get(varName));
-                emit("store " + symbolTable.get(varName) + " " +
+                emit(" %" + varName + " = alloca " + symbolTable.get(varName));
+                emit(" store " + symbolTable.get(varName) + " " +
                         getDefaultValue(symbolTable.get(varName)) + ", " +
                         symbolTable.get(varName) + "* %" + varName);
             }
@@ -142,13 +142,13 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         for (String line : irCode) {
             if (line.startsWith("store") || line.startsWith("%") &&
                     !line.contains("@")) {
-                mainBody.add(line);
+                mainBody.add(" " + line);
             } else {
                 newIrCode.add(line);
             }
         }
 
-        mainBody.add("ret i32 0");
+        mainBody.add(" ret i32 0");
         newIrCode.add("}");
 
         irCode = newIrCode;
