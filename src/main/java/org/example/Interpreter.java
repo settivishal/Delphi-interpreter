@@ -94,9 +94,9 @@ public class Interpreter {
 
     private static void compileToWasm(String llPath, String wasmPath) throws IOException, InterruptedException {
         ProcessBuilder pb = new ProcessBuilder(
-                "clang", "-target", "wasm32-unknown-unknown",
+                "C:\\Program Files\\LLVM\\bin\\clang.exe", "-target", "wasm32-unknown-unknown",
                 "-O3", "-nostdlib", "-Wl,--no-entry", "-Wl,--export-all",
-                "-o", wasmPath, llPath
+                "-Wl,--allow-undefined", "-o", wasmPath, llPath
         );
 
         Process process = pb.start();

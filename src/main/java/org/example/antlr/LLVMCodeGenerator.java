@@ -95,11 +95,6 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
     private int stringLiteralCounter = 0;
 
     private void emitHeader() {
-        emit("; LLVM IR for WebAssembly");
-        emit("target datalayout = \"e-m:e-p:32:32-i64:64-n32:64-S128\"");
-        emit("target triple = \"wasm32-unknown-unknown\"");
-        emit("");
-
         // Function declarations with proper attributes
         emit("declare void @writeln_i32(i32) #1");
         emit("declare void @writeln_str(i8*) #1");
