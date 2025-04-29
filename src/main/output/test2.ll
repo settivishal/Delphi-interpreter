@@ -3,10 +3,6 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 target triple = "wasm32-unknown-unknown"
 @.str.1 = private unnamed_addr constant [11 x i8] c"destructor\00"
 
-; LLVM IR for WebAssembly
-target datalayout = "e-m:e-p:32:32-i64:64-n32:64-S128"
-target triple = "wasm32-unknown-unknown"
-
 declare void @writeln_i32(i32) #1
 declare void @writeln_str(i8*) #1
 

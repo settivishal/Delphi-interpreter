@@ -146,7 +146,7 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
                 emit("%" + varName + " = alloca " + symbolTable.get(varName));
                 emit("store " + symbolTable.get(varName) + " " +
                         getDefaultValue(symbolTable.get(varName)) + ", " +
-                        symbolTable.get(varName) + "* %" + varName);
+                        symbolTable.get(varName) + "* @" + varName);
             }
         }
 
@@ -334,7 +334,7 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
 //        emit("%" + varName + " = alloca " + llvmType);
         emit("@" + varName + " = global " + llvmType + " " + getDefaultValue(llvmType));
         emit("store " + llvmType + " " + getDefaultValue(llvmType) +
-                ", " + llvmType + "* %" + varName);
+                ", " + llvmType + "* @" + varName);
 
         return null;
     }
@@ -402,7 +402,7 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         // Variables
         if (symbolTable.containsKey(expr)) {
             String temp = newTemp();
-            emit(temp + " = load " + expectedType + ", " + expectedType + "* %" + expr);
+            emit(temp + " = load " + expectedType + ", " + expectedType + "* @" + expr);
             return temp;
         }
 

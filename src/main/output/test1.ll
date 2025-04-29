@@ -13,23 +13,23 @@ attributes #1 = { "wasm-import-module"="env" }
 @y = global i32 0
 define i32 @main() {
 entry:
-	store i32 0, i32* %x
-	store i32 0, i32* %y
+	store i32 0, i32* @x
+	store i32 0, i32* @y
 	%1 = add i32 1, 5
 	store i32 %1, i32* @x
-	%2 = load i32, i32* %x
+	%2 = load i32, i32* @x
 	%3 = add i32 %2, 10
 	store i32 %3, i32* @y
-	%4 = load i32, i32* %y
+	%4 = load i32, i32* @y
 	%5 = mul i32 20, %4
 	store i32 %5, i32* @y
 	%6 = sdiv i32 200, 15
 	store i32 %6, i32* @x
-	%7 = load i32, i32* %y
+	%7 = load i32, i32* @y
 	call void @writeln_i32(i32 %7)
 	%x = alloca i32
-	store i32 0, i32* %x
+	store i32 0, i32* @x
 	%y = alloca i32
-	store i32 0, i32* %y
+	store i32 0, i32* @y
 	ret i32 0
 }
