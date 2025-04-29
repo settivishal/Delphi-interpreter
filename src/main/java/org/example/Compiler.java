@@ -7,18 +7,18 @@ import org.example.antlr.*;
 import java.io.*;
 import java.nio.file.*;
 
-public class Interpreter {
+public class Compiler {
     public static void main(String[] args) {
         if (args.length == 0) {
             System.out.println("Please provide test file names as arguments.");
-            System.out.println("Example: mvn exec:java -D\"exec.mainClass\"=\"org.example.Interpreter\" -D\"exec.args\"=\"test1 ...\"");
+            System.out.println("Example: mvn exec:java -D\"exec.mainClass\"=\"org.example.Compiler\" -D\"exec.args\"=\"test1 ...\"");
             return;
         }
 
         String testDirPath = "src/main/tests/";
         String outputDirPath = "src/main/output/";
-        String wasmDirPath = "src/main/wasm/";
-        String webDirPath = "src/main/web/";
+        String wasmDirPath = "src/main/resources/web/wasm/";
+        String webDirPath = "src/main/resources/web/";
 
         // Create directories if they don't exist
         try {
@@ -60,10 +60,10 @@ public class Interpreter {
                 String wasmPath = wasmDirPath + wasmFilename;
                 compileToWasm(llPath, wasmPath);
 
-                // Copy WASM to web directory
-                Files.copy(Paths.get(wasmPath),
-                        Paths.get(webDirPath + wasmFilename),
-                        StandardCopyOption.REPLACE_EXISTING);
+//                // Copy WASM to web directory
+//                Files.copy(Paths.get(wasmPath),
+//                        Paths.get(webDirPath + wasmFilename),
+//                        StandardCopyOption.REPLACE_EXISTING);
 
                 System.out.println("Successfully processed: " + testFile);
                 System.out.println("  LLVM IR: " + llPath);
@@ -140,7 +140,8 @@ public class Interpreter {
                         "const imports = { env: { memory } };\n\n" +
                         "async function runWasm(wasmFile) {\n" +
                         "    try {\n" +
-                        "        const response = await fetch(wasmFile);\n" +
+                        "        // Load WASM from '../wasm/' directory\n" +
+                        "        const response = await fetch('../wasm/' + wasmFile);\n" +  // Key change!
                         "        const bytes = await response.arrayBuffer();\n" +
                         "        const { instance } = await WebAssembly.instantiate(bytes, imports);\n" +
                         "        document.getElementById('output').textContent = '';\n" +
@@ -149,9 +150,9 @@ public class Interpreter {
                         "        document.getElementById('output').textContent = 'Error: ' + err.message;\n" +
                         "    }\n" +
                         "}\n\n" +
-                        "// Auto-discover WASM files\n" +
+                        "// Auto-discover WASM files (from wasm folder)\n" +
                         "window.onload = () => {\n" +
-                        "    fetch('.')\n" +
+                        "    fetch('../wasm/')  // Key change!\n" +
                         "        .then(r => r.text())\n" +
                         "        .then(html => {\n" +
                         "            const wasmFiles = [...html.matchAll(/href=\"(.*?\\.wasm)\"/g)]\n" +
