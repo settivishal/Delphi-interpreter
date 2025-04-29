@@ -49,12 +49,12 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         // 1. Add header first
         finalIR.add("; LLVM IR for Extended Pascal/Delphi");
         finalIR.add("target datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"");
-        finalIR.add("target triple = \"x86_64-pc-linux-gnu\"");
-        finalIR.add("declare noalias i8* @malloc(i64)");
-        finalIR.add("declare void @free(i8*)");
-        finalIR.add("declare void @writeln_i32(i32)");
-        finalIR.add("declare void @writeln_str(i8*)");
-        finalIR.add("");
+        finalIR.add("target triple = \"wasm32-unknown-unknown\"");
+//        finalIR.add("declare noalias i8* @malloc(i64)");
+//        finalIR.add("declare void @free(i8*)");
+//        finalIR.add("declare void @writeln_i32(i32)");
+//        finalIR.add("declare void @writeln_str(i8*)");
+//        finalIR.add("");
 
         // 2. Add string literals next
         for (Map.Entry<String, String> entry : stringLiterals.entrySet()) {
@@ -136,17 +136,19 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
 
     private void emitMainFunction() {
         emit("\ndefine i32 @main() {");
-        emit("\t" + "entry:");
+        emit("entry:");
 
         // Visit all statements in the program block
         for (String varName : symbolTable.keySet()) {
             if (!varName.startsWith("%")) {
-                emit("\t" + "%" + varName + " = alloca " + symbolTable.get(varName));
+//                emit("\t" + "%" + varName + " = alloca " + symbolTable.get(varName));
                 emit("\t" + "store " + symbolTable.get(varName) + " " +
                         getDefaultValue(symbolTable.get(varName)) + ", " +
                         symbolTable.get(varName) + "* %" + varName);
             }
         }
+
+        emit(" ");
 
         // Move all global statements into main
         List<String> newIrCode = new ArrayList<>();
