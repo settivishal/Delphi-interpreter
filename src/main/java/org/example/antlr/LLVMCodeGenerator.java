@@ -95,13 +95,19 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
     private int stringLiteralCounter = 0;
 
     private void emitHeader() {
-        emit("; LLVM IR for Extended Pascal/Delphi");
-        emit("target datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"");
-        emit("target triple = \"x86_64-pc-linux-gnu\"");
-        emit("declare noalias i8* @malloc(i64)");
-        emit("declare void @free(i8*)");
-        emit("declare void @writeln_i32(i32)");  // For integers
-        emit("declare void @writeln_str(i8*)");  // For strings
+        emit("; LLVM IR for WebAssembly");
+        emit("target datalayout = \"e-m:e-p:32:32-i64:64-n32:64-S128\"");
+        emit("target triple = \"wasm32-unknown-unknown\"");
+        emit("");
+
+        // Function declarations with proper attributes
+        emit("declare void @writeln_i32(i32) #1");
+        emit("declare void @writeln_str(i8*) #1");
+        emit("");
+
+        // Attribute sections
+        emit("attributes #0 = { \"wasm-export-name\"=\"memory\" }");
+        emit("attributes #1 = { \"wasm-import-module\"=\"env\" }");
         emit("");
     }
 
@@ -124,50 +130,58 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
     // Program Structure
     @Override
     public Object visitProgram(delphiParser.ProgramContext ctx) {
+        emitHeader();
         emit("; Program: " + ctx.programHeading().identifier().getText());
+
+        // Process all declarations first
         visitChildren(ctx);
 
-        // Only add main if not already present
-        if (!irCode.stream().anyMatch(s -> s.contains("define i32 @main"))) {
-            emitMainFunction();
-        }
+        // Generate main function wrapping all statements
+        emitMainFunction();
         return null;
     }
 
     private void emitMainFunction() {
-        emit("\ndefine i32 @main() {");
+        emit("define i32 @main() {");
         emit("entry:");
 
-        // Visit all statements in the program block
+        // 1. Allocate and initialize all variables
         for (String varName : symbolTable.keySet()) {
             if (!varName.startsWith("%")) {
-//                emit("\t" + "%" + varName + " = alloca " + symbolTable.get(varName));
-                emit("\t" + "store " + symbolTable.get(varName) + " " +
+                emit("%" + varName + " = alloca " + symbolTable.get(varName));
+                emit("store " + symbolTable.get(varName) + " " +
                         getDefaultValue(symbolTable.get(varName)) + ", " +
                         symbolTable.get(varName) + "* %" + varName);
             }
         }
 
-        emit(" ");
-
-        // Move all global statements into main
-        List<String> newIrCode = new ArrayList<>();
-        List<String> mainBody = new ArrayList<>();
+        // 2. Move all executable instructions into main
+        List<String> executableCode = new ArrayList<>();
+        List<String> declarations = new ArrayList<>();
 
         for (String line : irCode) {
-            if (line.startsWith("store") || line.startsWith("%") &&
-                    !line.contains("@")) {
-                mainBody.add("\t" + line);
+            if (isExecutableInstruction(line)) {
+                executableCode.add("\t" + line);
             } else {
-                newIrCode.add(line);
+                declarations.add(line);
             }
         }
 
-        mainBody.add("\t" + "ret i32 0");
-        newIrCode.add("}");
+        // 3. Add the executable code to main
+        executableCode.add("\tret i32 0");
 
-        irCode = newIrCode;
-        irCode.addAll(irCode.size() - 1, mainBody);
+        // Rebuild IR with declarations first, then main function
+        irCode = declarations;
+        irCode.addAll(executableCode);
+        irCode.add("}");
+    }
+
+    private boolean isExecutableInstruction(String line) {
+        return line.startsWith("%") ||          // Instructions
+                line.startsWith("store") ||      // Stores
+                line.startsWith("call") ||       // Function calls
+                line.startsWith("br") ||         // Branches
+                line.startsWith("ret");          // Returns
     }
 
     // Class Support
@@ -319,15 +333,13 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         String pascalType = parts[1].trim();
         String llvmType = mapType(pascalType);
 
-        // Add to symbol table
         symbolTable.put(varName, llvmType);
 
-        // Emit allocation
-        if (currentFunction != null) {
-            emit("%" + varName + " = alloca " + llvmType);
-        } else {
-            emit("@" + varName + " = global " + llvmType + " " + getDefaultValue(llvmType));
-        }
+        // Always generate stack allocation (no globals)
+//        emit("%" + varName + " = alloca " + llvmType);
+        emit("@" + varName + " = global " + llvmType + " " + getDefaultValue(llvmType));
+        emit("store " + llvmType + " " + getDefaultValue(llvmType) +
+                ", " + llvmType + "* %" + varName);
 
         return null;
     }
@@ -395,15 +407,10 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         // Variables
         if (symbolTable.containsKey(expr)) {
             String temp = newTemp();
-            if (currentFunction != null) {
-                emit(temp + " = load " + expectedType + ", " + expectedType + "* %" + expr);
-            } else {
-                emit(temp + " = load " + expectedType + ", " + expectedType + "* @" + expr);
-            }
+            emit(temp + " = load " + expectedType + ", " + expectedType + "* %" + expr);
             return temp;
         }
 
-        // Default value
         return getDefaultValue(expectedType);
     }
 
@@ -417,17 +424,15 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
 
         emit("br i1 " + cond + ", label %" + trueLabel + ", label %" + falseLabel);
 
-        emit("\n" + trueLabel + ":");
+        emit(trueLabel + ":");
         visit(ctx.statement(0));
         emit("br label %" + endLabel);
 
-        emit("\n" + falseLabel + ":");
-        if (ctx.ELSE() != null) {
-            visit(ctx.statement(1));
-        }
+        emit(falseLabel + ":");
+        if (ctx.ELSE() != null) visit(ctx.statement(1));
         emit("br label %" + endLabel);
 
-        emit("\n" + endLabel + ":");
+        emit(endLabel + ":");
         return null;
     }
 
