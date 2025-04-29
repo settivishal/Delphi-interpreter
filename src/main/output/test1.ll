@@ -8,28 +8,27 @@ declare void @writeln_str(i8*) #1
 attributes #0 = { "wasm-export-name"="memory" }
 attributes #1 = { "wasm-import-module"="env" }
 
+
 ; Program: Test
 @x = global i32 0
 @y = global i32 0
 define i32 @main() {
-entry:
-	store i32 0, i32* @x
-	store i32 0, i32* @y
-	%1 = add i32 1, 5
-	store i32 %1, i32* @x
-	%2 = load i32, i32* @x
-	%3 = add i32 %2, 10
-	store i32 %3, i32* @y
-	%4 = load i32, i32* @y
-	%5 = mul i32 20, %4
-	store i32 %5, i32* @y
-	%6 = sdiv i32 200, 15
-	store i32 %6, i32* @x
-	%7 = load i32, i32* @y
-	call void @writeln_i32(i32 %7)
-	%x = alloca i32
-	store i32 0, i32* @x
-	%y = alloca i32
-	store i32 0, i32* @y
-	ret i32 0
+  entry:
+  %x.addr = alloca i32
+  store i32 0, i32* %x.addr
+  %y.addr = alloca i32
+  store i32 0, i32* %y.addr
+  %1 = add i32 1, 5
+  store i32 %1, i32* @x
+  %3 = load i32, i32* @x
+  %4 = add i32 %3, 10
+  store i32 %4, i32* @y
+  %6 = load i32, i32* @y
+  %7 = mul i32 20, %6
+  store i32 %7, i32* @y
+  %9 = sdiv i32 200, 15
+  store i32 %9, i32* @x
+  %11 = load i32, i32* @y
+  call void @writeln_i32(i32 %11)
+  ret i32 0
 }

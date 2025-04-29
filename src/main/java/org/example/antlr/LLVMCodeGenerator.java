@@ -50,6 +50,17 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         finalIR.add("; LLVM IR for Extended Pascal/Delphi");
         finalIR.add("target datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"");
         finalIR.add("target triple = \"wasm32-unknown-unknown\"");
+        finalIR.add("");
+
+        // Function declarations with proper attributes
+        finalIR.add("declare void @writeln_i32(i32) #1");
+        finalIR.add("declare void @writeln_str(i8*) #1");
+        finalIR.add("");
+
+        // Attribute sections
+        finalIR.add("attributes #0 = { \"wasm-export-name\"=\"memory\" }");
+        finalIR.add("attributes #1 = { \"wasm-import-module\"=\"env\" }");
+        finalIR.add("");
 
         // 2. Add string literals next
         for (Map.Entry<String, String> entry : stringLiterals.entrySet()) {
@@ -120,7 +131,7 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
     // Program Structure
     @Override
     public Object visitProgram(delphiParser.ProgramContext ctx) {
-        emitHeader();
+//        emitHeader();
         emit("; Program: " + ctx.programHeading().identifier().getText());
 
         // Process all declarations first
@@ -132,38 +143,61 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
     }
 
     private void emitMainFunction() {
-        emit("define i32 @main() {");
-        emit("entry:");
+        List<String> mainCode = new ArrayList<>();
+        mainCode.add("define i32 @main() {");
+        mainCode.add("  entry:");
 
         // 1. Allocate and initialize all variables
         for (String varName : symbolTable.keySet()) {
             if (!varName.startsWith("%")) {
-                emit("%" + varName + " = alloca " + symbolTable.get(varName));
-                emit("store " + symbolTable.get(varName) + " " +
+                mainCode.add("  %" + varName + ".addr = alloca " + symbolTable.get(varName));
+                mainCode.add("  store " + symbolTable.get(varName) + " " +
                         getDefaultValue(symbolTable.get(varName)) + ", " +
-                        symbolTable.get(varName) + "* @" + varName);
+                        symbolTable.get(varName) + "* %" + varName + ".addr");
             }
         }
 
-        // 2. Move all executable instructions into main
+        // 2. Identify executable code and declarations
         List<String> executableCode = new ArrayList<>();
         List<String> declarations = new ArrayList<>();
 
+        boolean inMain = false;
         for (String line : irCode) {
-            if (isExecutableInstruction(line)) {
-                executableCode.add("\t" + line);
-            } else {
+            // Skip header that's already added
+            if (line.startsWith("declare") || line.startsWith("attributes")) {
+                continue;
+            }
+
+            // Skip global variable declarations (already handled)
+            if (line.startsWith("@") && line.contains("global")) {
                 declarations.add(line);
+                continue;
+            }
+
+            if (isExecutableInstruction(line)) {
+                executableCode.add("  " + line);
+            } else if (!line.trim().isEmpty()) {
+                // Handle label declarations properly
+                if (line.endsWith(":")) {
+                    executableCode.add("  " + line);
+                } else {
+                    declarations.add(line);
+                }
             }
         }
 
         // 3. Add the executable code to main
-        executableCode.add("\tret i32 0");
+        mainCode.addAll(executableCode);
+
+        // Add return statement if not present
+        if (!executableCode.isEmpty() && !executableCode.get(executableCode.size() - 1).contains("ret")) {
+            mainCode.add("  ret i32 0");
+        }
+        mainCode.add("}");
 
         // Rebuild IR with declarations first, then main function
         irCode = declarations;
-        irCode.addAll(executableCode);
-        irCode.add("}");
+        irCode.addAll(mainCode);
     }
 
     private boolean isExecutableInstruction(String line) {
@@ -205,7 +239,7 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
     private void emitConstructor(LLVMClass classDef) {
         String className = classDef.name;
         emit("define %struct." + className + "* @" + className + "_create() {");
-        emit("entry:");
+        emit("  entry:");
 
         // Calculate size
         int size = classDef.fields.values().stream()
@@ -214,23 +248,23 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
 
         // Allocate memory
         String mallocResult = newTemp();
-        emit(mallocResult + " = call noalias i8* @malloc(i64 " + size + ")");
+        emit("  " + mallocResult + " = call noalias i8* @malloc(i64 " + size + ")");
 
         // Cast to class type
         String objectPtr = newTemp();
-        emit(objectPtr + " = bitcast i8* " + mallocResult + " to %struct." + className + "*");
+        emit("  " + objectPtr + " = bitcast i8* " + mallocResult + " to %struct." + className + "*");
 
         // Initialize fields
         int index = 0;
         for (Map.Entry<String, String> field : classDef.fields.entrySet()) {
             String fieldPtr = newTemp();
-            emit(fieldPtr + " = getelementptr %struct." + className +
+            emit("  " + fieldPtr + " = getelementptr %struct." + className +
                     ", %struct." + className + "* " + objectPtr + ", i32 0, i32 " + index++);
-            emit("store " + field.getValue() + " " + getDefaultValue(field.getValue()) +
+            emit("  store " + field.getValue() + " " + getDefaultValue(field.getValue()) +
                     ", " + field.getValue() + "* " + fieldPtr);
         }
 
-        emit("ret %struct." + className + "* " + objectPtr);
+        emit("  ret %struct." + className + "* " + objectPtr);
         emit("}\n");
     }
 
@@ -296,14 +330,14 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
             // Generate method
             emit("define " + returnType + " @" + currentClassName + "_" + funcName +
                     "(%struct." + currentClassName + "* %this) {");
-            emit("entry:");
+            emit("  entry:");
 
             // TODO: Implement method body
 
             if (!returnType.equals("void")) {
-                emit("ret " + returnType + " " + getDefaultValue(returnType));
+                emit("  ret " + returnType + " " + getDefaultValue(returnType));
             } else {
-                emit("ret void");
+                emit("  ret void");
             }
             emit("}\n");
             return null;
@@ -325,11 +359,8 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
 
         symbolTable.put(varName, llvmType);
 
-        // Always generate stack allocation (no globals)
-//        emit("%" + varName + " = alloca " + llvmType);
+        // Define as global variable
         emit("@" + varName + " = global " + llvmType + " " + getDefaultValue(llvmType));
-        emit("store " + llvmType + " " + getDefaultValue(llvmType) +
-                ", " + llvmType + "* @" + varName);
 
         return null;
     }
@@ -339,7 +370,7 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
     public Object visitAssignmentStatement(delphiParser.AssignmentStatementContext ctx) {
         String[] parts = ctx.getText().split(":=");
         String lhs = parts[0].trim();
-        String rhs = parts[1].trim();
+        String rhs = parts[1].trim().replace(";", "");  // Remove trailing semicolon
 
         if (!symbolTable.containsKey(lhs)) return null;
 
@@ -352,9 +383,13 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
             value = evaluateRHS(rhs, llvmType);
         }
 
+        // Load from stack address if in function
+        String ptrTemp = newTemp();
         if (currentFunction != null) {
-            emit("store " + llvmType + " " + value + ", " + llvmType + "* %" + lhs);
+            emit(ptrTemp + " = load " + llvmType + "*, " + llvmType + "** %" + lhs + ".addr");
+            emit("store " + llvmType + " " + value + ", " + llvmType + "* " + ptrTemp);
         } else {
+            // In main function, use the address directly from symbol table
             emit("store " + llvmType + " " + value + ", " + llvmType + "* @" + lhs);
         }
 
@@ -397,7 +432,13 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         // Variables
         if (symbolTable.containsKey(expr)) {
             String temp = newTemp();
-            emit(temp + " = load " + expectedType + ", " + expectedType + "* @" + expr);
+            if (currentFunction != null) {
+                String addrTemp = newTemp();
+                emit(addrTemp + " = load " + expectedType + "*, " + expectedType + "** %" + expr + ".addr");
+                emit(temp + " = load " + expectedType + ", " + expectedType + "* " + addrTemp);
+            } else {
+                emit(temp + " = load " + expectedType + ", " + expectedType + "* @" + expr);
+            }
             return temp;
         }
 
@@ -407,59 +448,85 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
     // Control Flow
     @Override
     public Object visitIfStatement(delphiParser.IfStatementContext ctx) {
-        String cond = visitExpression(ctx.expression(), "i1");
-        String trueLabel = newLabel();
-        String falseLabel = newLabel();
+        String condValue = visitExpression(ctx.expression(), "i1");
+        String thenLabel = newLabel();
+        String elseLabel = newLabel();
         String endLabel = newLabel();
 
-        emit("br i1 " + cond + ", label %" + trueLabel + ", label %" + falseLabel);
+        // Branch based on condition
+        emit("br i1 " + condValue + ", label %" + thenLabel + ", label %" +
+                (ctx.ELSE() != null ? elseLabel : endLabel));
 
-        emit(trueLabel + ":");
+        // Then block
+        emit(thenLabel + ":");
         visit(ctx.statement(0));
         emit("br label %" + endLabel);
 
-        emit(falseLabel + ":");
-        if (ctx.ELSE() != null) visit(ctx.statement(1));
-        emit("br label %" + endLabel);
+        // Else block (if present)
+        if (ctx.ELSE() != null) {
+            emit(elseLabel + ":");
+            visit(ctx.statement(1));
+            emit("br label %" + endLabel);
+        }
 
+        // End of if statement
         emit(endLabel + ":");
         return null;
     }
 
     @Override
     public Object visitWhileStatement(delphiParser.WhileStatementContext ctx) {
-        String startLabel = newLabel();
         String condLabel = newLabel();
         String bodyLabel = newLabel();
         String endLabel = newLabel();
 
+        // Jump to condition check
         emit("br label %" + condLabel);
 
-        emit("\n" + condLabel + ":");
-        String cond = visitExpression(ctx.expression(), "i1");
-        emit("br i1 " + cond + ", label %" + bodyLabel + ", label %" + endLabel);
+        // Condition check
+        emit(condLabel + ":");
+        String condValue = visitExpression(ctx.expression(), "i1");
+        emit("br i1 " + condValue + ", label %" + bodyLabel + ", label %" + endLabel);
 
-        emit("\n" + bodyLabel + ":");
+        // Loop body
+        emit(bodyLabel + ":");
         visit(ctx.statement());
         emit("br label %" + condLabel);
 
-        emit("\n" + endLabel + ":");
+        // End of while loop
+        emit(endLabel + ":");
         return null;
     }
 
     private String visitExpression(delphiParser.ExpressionContext ctx, String expectedType) {
-        // Simplified - would need full expression handling
+        // Simplified expression handling
         String text = ctx.getText();
 
-        if (text.contains("=")) {
-            String[] parts = text.split("=");
-            String left = evaluateRHS(parts[0].trim(), expectedType);
-            String right = evaluateRHS(parts[1].trim(), expectedType);
+        // Handle comparisons
+        if (text.contains("<")) {
+            String[] parts = text.split("<");
+            String left = evaluateRHS(parts[0].trim(), "i32");
+            String right = evaluateRHS(parts[1].trim(), "i32");
             String result = newTemp();
-            emit(result + " = icmp eq " + expectedType + " " + left + ", " + right);
+            emit(result + " = icmp slt i32 " + left + ", " + right);
+            return result;
+        } else if (text.contains(">")) {
+            String[] parts = text.split(">");
+            String left = evaluateRHS(parts[0].trim(), "i32");
+            String right = evaluateRHS(parts[1].trim(), "i32");
+            String result = newTemp();
+            emit(result + " = icmp sgt i32 " + left + ", " + right);
+            return result;
+        } else if (text.contains("=")) {
+            String[] parts = text.split("=");
+            String left = evaluateRHS(parts[0].trim(), "i32");
+            String right = evaluateRHS(parts[1].trim(), "i32");
+            String result = newTemp();
+            emit(result + " = icmp eq i32 " + left + ", " + right);
             return result;
         }
 
+        // Default case - return the value
         return evaluateRHS(text, expectedType);
     }
 
@@ -490,33 +557,4 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         stringLiterals.put(literalName, content);
         return literalName;
     }
-
-    // Main Function
-//    public static void main(String[] args) {
-//        try {
-//            // Read input file
-//            String inputFile = args.length > 0 ? args[0] : "input.pas";
-//            String pascalCode = new String(Files.readAllBytes(Paths.get(inputFile)));
-//
-//            // Parse
-//            delphiLexer lexer = new delphiLexer(CharStreams.fromString(pascalCode));
-//            delphiParser parser = new delphiParser(new CommonTokenStream(lexer));
-//            ParseTree tree = parser.program();
-//
-//            // Generate LLVM IR
-//            LLVMCodeGenerator generator = new LLVMCodeGenerator();
-//            generator.visit(tree);
-//            String llvmIR = generator.generateIR();
-//
-//            // Write output
-//            String outputFile = args.length > 1 ? args[1] : "output.ll";
-//            Files.write(Paths.get(outputFile), llvmIR.getBytes());
-//
-//            System.out.println("Successfully generated LLVM IR: " + outputFile);
-//        } catch (Exception e) {
-//            System.err.println("Error during compilation:");
-//            e.printStackTrace();
-//            System.exit(1);
-//        }
-//    }
 }
