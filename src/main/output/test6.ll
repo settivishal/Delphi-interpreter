@@ -8,37 +8,31 @@ declare void @writeln_str(i8*) #1
 attributes #0 = { "wasm-export-name"="memory" }
 attributes #1 = { "wasm-import-module"="env" }
 
+
+; Program: Test
 @y = global i32 0
 @x = global i32 0
-
 define i32 @main() {
-entry:
-  store i32 1, i32* @y          ; Initialize y = 1
-  br label %for.cond
-
-for.cond:
-  %y.val = load i32, i32* @y    ; Load current y value
-  %cmp = icmp sle i32 %y.val, 10 ; Compare y <= 10
-  br i1 %cmp, label %for.body, label %for.end
-
-for.body:
-  %y.print = load i32, i32* @y  ; Load y for printing
-  call void @writeln_i32(i32 %y.print)
-
-  ; Increment y
-  %y.inc = add i32 %y.val, 1
-  store i32 %y.inc, i32* @y
-  br label %for.cond
-
-for.end:
-  ; After loop, y will be 11
-  %y.final = load i32, i32* @y
-  %x.val = add i32 10, %y.final ; x = 10 + y
-  store i32 %x.val, i32* @x
-
-  ; Print x
-  %x.print = load i32, i32* @x
-  call void @writeln_i32(i32 %x.print)
-
+  entry:
+  store i32 0, i32* @x
+  store i32 0, i32* @y
+  store i32 1, i32* @y
+  br label %for.cond.0
+for.cond.0:
+  %1 = load i32, i32* @y
+  %2 = icmp sle i32 %1, 10
+  br i1 %2, label %for.body.1, label %for.end.3
+for.body.1:
+  %3 = load i32, i32* @y
+  %4 = add i32 10, %3
+  store i32 %4, i32* @x
+  br label %for.inc.2
+for.inc.2:
+  %6 = add i32 %1, 1
+  store i32 %6, i32* @y
+  br label %for.cond.0
+for.end.3:
+  %7 = load i32, i32* @x
+  call void @writeln_i32(i32 %7)
   ret i32 0
 }
