@@ -17,8 +17,8 @@ public class Compiler {
 
         String testDirPath = "src/main/tests/";
         String outputDirPath = "src/main/output/";
-        String wasmDirPath = "src/main/resources/web/wasm/";
-        String webDirPath = "src/main/resources/web/";
+        String wasmDirPath = "src/main/web/wasm/";
+        String webDirPath = "src/main/web/";
 
         // Create directories if they don't exist
         try {
