@@ -8,20 +8,12 @@ declare void @writeln_str(i8*) #1
 attributes #0 = { "wasm-export-name"="memory" }
 attributes #1 = { "wasm-import-module"="env" }
 
+@.str.1 = private unnamed_addr constant [14 x i8] c"Hello, World!\00"
 
-; Program: Test
-@x = global i32 0
+; Program: Hello
 define i32 @main() {
   entry:
-  %x.addr = alloca i32
-  store i32 0, i32* %x.addr
-  %1 = load i32, i32* @x
-  call void @writeln_i32(i32 %1)
-  %2 = load i32, i32* @x
-  %3 = icmp eq i32 %2, 3
-  br i1 %3, label %label1, label %label3
-  label1:
-  br label %label3
-  label3:
+  %1 = getelementptr inbounds [14 x i8], [14 x i8]* @.str.1, i64 0, i64 0
+  call void @writeln_str(i8* %1)
   ret i32 0
 }
