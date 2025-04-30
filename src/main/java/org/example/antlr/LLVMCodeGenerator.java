@@ -466,15 +466,15 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
 
         // Then block
         emit(thenLabel + ":");
-        visit(ctx.statement(0));  // Visit the compound statement
-        emit("br label %" + endLabel);
+        visit(ctx.statement(0));  // This may contain break/continue
+        emit("br label %" + endLabel);  // Default: proceed to end
 
         // Else block (if present)
         if (ctx.ELSE() != null) {
             emit(elseLabel + ":");
             visit(ctx.statement(1));
+            emit("br label %" + endLabel);
         }
-        emit("br label %" + endLabel);
 
         // End of if
         emit(endLabel + ":");
@@ -483,11 +483,9 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
 
     @Override
     public Object visitForStatement(delphiParser.ForStatementContext ctx) {
-        // Get the loop variable and bounds from the grammar structure
         String varName = ctx.identifier().getText();
         delphiParser.ForListContext forList = ctx.forList();
 
-        // Get initial and final values
         String startVal = forList.initialValue().getText();
         String endVal = forList.finalValue().getText();
         boolean isDownto = forList.DOWNTO() != null;
@@ -497,6 +495,9 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         String bodyLabel = "for.body." + labelCounter++;
         String incLabel = "for.inc." + labelCounter++;
         String endLabel = "for.end." + labelCounter++;
+
+        // Push loop context for break/continue
+        loopStack.push(new LoopContext(condLabel, bodyLabel, endLabel));
 
         // Initialize loop variable
         emit("store i32 " + startVal + ", i32* @" + varName);
@@ -508,7 +509,6 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         emit(currentVal + " = load i32, i32* @" + varName);
         String cmpResult = newTemp();
 
-        // Use appropriate comparison based on TO/DOWNTO
         if (isDownto) {
             emit(cmpResult + " = icmp sge i32 " + currentVal + ", " + endVal);
         } else {
@@ -519,7 +519,7 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
 
         // Loop body
         emit(bodyLabel + ":");
-        visit(ctx.statement());
+        visit(ctx.statement());  // This will handle any break statements
         emit("br label %" + incLabel);
 
         // Increment/Decrement
@@ -536,6 +536,8 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         // End of loop
         emit(endLabel + ":");
 
+        // Pop loop context
+        loopStack.pop();
         return null;
     }
 
@@ -634,12 +636,14 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
 
     @Override
     public Object visitBreakStatement(delphiParser.BreakStatementContext ctx) {
-        String endLabel = getCurrentLoopEndLabel();
-        if (endLabel != null) {
-            emit("br label %" + endLabel);
-        } else {
+        if (loopStack.isEmpty()) {
             emit("; ERROR: break outside loop");
+            return null;
         }
+
+        // Get the end label of the innermost loop
+        String endLabel = loopStack.peek().endLabel;
+        emit("br label %" + endLabel);  // Unconditionally jump to loop exit
         return null;
     }
 
