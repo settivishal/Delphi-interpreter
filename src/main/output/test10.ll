@@ -25,10 +25,10 @@ while.cond.0:
 while.body.1:
   %4 = load i32, i32* @x
   %5 = icmp eq i32 %4, 3
-  br i1 %5, label %label4, label %label6
-label4:
-  br label %label6
-label6:
+  br i1 %5, label %if.then.3, label %if.end.5
+if.then.3:
+  br label %if.end.5
+if.end.5:
   %6 = load i32, i32* @x
   call void @writeln_i32(i32 %6)
   %7 = load i32, i32* @x
