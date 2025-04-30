@@ -11,22 +11,24 @@ attributes #1 = { "wasm-import-module"="env" }
 
 ; Program: Test
 @x = global i32 0
-@y = global i32 0
+@i = global i32 0
 define i32 @main() {
   entry:
   store i32 0, i32* @x
-  store i32 0, i32* @y
-  %1 = add i32 1, 5
-  store i32 %1, i32* @x
-  %3 = load i32, i32* @x
-  %4 = add i32 %3, 10
-  store i32 %4, i32* @y
-  %6 = load i32, i32* @y
-  %7 = mul i32 20, %6
-  store i32 %7, i32* @y
-  %9 = sdiv i32 200, 15
-  store i32 %9, i32* @x
-  %11 = load i32, i32* @y
-  call void @writeln_i32(i32 %11)
+  store i32 0, i32* @i
+  store i32 1, i32* @x
+  br label %while.cond.0
+while.cond.0:
+  %2 = load i32, i32* @x
+  %3 = icmp slt i32 %2, 8
+  br i1 %3, label %while.body.1, label %while.end.2
+while.body.1:
+  %4 = load i32, i32* @x
+  %5 = add i32 %4, 2
+  store i32 %5, i32* @x
+  %7 = load i32, i32* @x
+  call void @writeln_i32(i32 %7)
+  br label %while.cond.0
+while.end.2:
   ret i32 0
 }

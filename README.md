@@ -50,6 +50,24 @@ This project extends Pascal to support:
 - Interfaces
     - Grammar for interfaces added enabling abstraction in the language.
 
+- FOR Loop
+  - Implemented logic for FOR loop
+
+- WHILE Loop
+     - Implemented logic for WHILE loop
+
+- BREAK and CONTINUE
+  - Implemented Grammar and logic for BREAK and CONTINUE.
+
+- IF THEN ELSE
+  - Implemented Logic for IF THEN ELSE
+
+- User-Defined Procedures and Functions
+    - Implemented user defined procedures and functions
+
+- Static Scoping
+  - Static Scoping Implemented
+
 ## Installation & Build
 - Download the .zip file and extract the files into a folder.
 - Ensure that Maven is installed and working by running:
@@ -81,10 +99,10 @@ mvn compile
 **Recommended approach:**
 
 
-- Run multiple test files present i.e, test1.pas, test2.pas, test3.pas, test4.pas, test5.pas.
+- Run multiple test files present i.e, test1.pas, test2.pas, test3.pas, test4.pas, test5.pas ..etc.
 
 
 - Run the test cases:
 ```
-mvn exec:java -D"exec.mainClass"="org.example.Interpreter" -D"exec.args"="test1 test2 test3 test4 test5"
+mvn exec:java -D"exec.mainClass"="org.example.Interpreter" -D"exec.args"="test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11 test12 test13 test14"
 ```

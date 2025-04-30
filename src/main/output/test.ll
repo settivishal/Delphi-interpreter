@@ -9,19 +9,8 @@ attributes #0 = { "wasm-export-name"="memory" }
 attributes #1 = { "wasm-import-module"="env" }
 
 
-; Program: Test
-@x = global i32 0
+; Program: Hello
 define i32 @main() {
   entry:
-  store i32 0, i32* @x
-  store i32 1, i32* @x
-  %2 = load i32, i32* @x
-  %3 = icmp eq i32 %2, 1
-  br i1 %3, label %if.then.0, label %if.end.2
-if.then.0:
-  br label %if.end.2
-if.end.2:
-  %4 = load i32, i32* @x
-  call void @writeln_i32(i32 %4)
   ret i32 0
 }

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delphi WASM Runner</title>
+    <script src="runtime.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #ffffff;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #1f6feb;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+
+        button:hover {
+            background-color: #388bfd;
+            transform: scale(1.05);
+        }
+
+        #output {
+            width: 90%;
+            max-width: 1000px;
+            min-height: 300px;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 25px;
+            font-family: monospace;
+            font-size: 1.2rem;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            color: #d1d5db;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<h1>Delphi Program Output</h1>
+<div class="button-container">
+    <button onclick="runWasm('wasm/test.wasm')">Run test</button>
+    <button onclick="runWasm('wasm/test1.wasm')">Run test 1</button>
+    <button onclick="runWasm('wasm/test6.wasm')">Run test 6</button>
+    <button onclick="runWasm('wasm/test7.wasm')">Run test 7</button>
+    <button onclick="runWasm('wasm/test8.wasm')">Run test 8</button>
+    <button onclick="runWasm('wasm/test9.wasm')">Run test 9</button>
+    <button onclick="runWasm('wasm/test12.wasm')">Run test 12</button>
+</div>
+<div id="output">Click a button above to run a WASM module.</div>
+</body>
+</html>
