@@ -20,8 +20,8 @@ define i32 @main() {
   br i1 %3, label %if.then.0, label %if.end.2
 if.then.0:
   br label %if.end.2
-  br label %if.end.2
 if.end.2:
-  call void @writeln_i32(i32 0)
+  %4 = load i32, i32* @x
+  call void @writeln_i32(i32 %4)
   ret i32 0
 }

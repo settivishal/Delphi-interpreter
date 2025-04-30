@@ -8,6 +8,6 @@ BEGIN
             z := 3;
         end;
 
-    writeln(z);
+    writeln(x);
 
 END.
