@@ -14,23 +14,21 @@ attributes #1 = { "wasm-import-module"="env" }
 @i = global i32 0
 define i32 @main() {
   entry:
-  %x.addr = alloca i32
-  store i32 0, i32* %x.addr
-  %i.addr = alloca i32
-  store i32 0, i32* %i.addr
+  store i32 0, i32* @x
+  store i32 0, i32* @i
   store i32 1, i32* @x
-  br label %label1
-  label1:
+  br label %while.cond.0
+while.cond.0:
   %2 = load i32, i32* @x
   %3 = icmp slt i32 %2, 8
-  br i1 %3, label %label2, label %label3
-  label2:
+  br i1 %3, label %while.body.1, label %while.end.2
+while.body.1:
   %4 = load i32, i32* @x
   %5 = add i32 %4, 2
   store i32 %5, i32* @x
   %7 = load i32, i32* @x
   call void @writeln_i32(i32 %7)
-  br label %label1
-  label3:
+  br label %while.cond.0
+while.end.2:
   ret i32 0
 }

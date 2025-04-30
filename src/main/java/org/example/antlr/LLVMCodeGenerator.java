@@ -7,7 +7,6 @@ import java.util.regex.*;
 import java.io.IOException;
 import java.nio.file.*;
 
-
 public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
     // IR Generation State
     private List<String> irCode = new ArrayList<>();
@@ -40,6 +39,20 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
             this.returnType = returnType;
         }
     }
+
+    private static class LoopContext {
+        String condLabel;
+        String bodyLabel;
+        String endLabel;
+
+        LoopContext(String cond, String body, String end) {
+            this.condLabel = cond;
+            this.bodyLabel = body;
+            this.endLabel = end;
+        }
+    }
+
+    private Stack<LoopContext> loopStack = new Stack<>();
 
     // Main Generation Entry Point
     public String generateIR() {
@@ -128,6 +141,14 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         }
     }
 
+    private String getCurrentLoopEndLabel() {
+        return loopStack.isEmpty() ? null : loopStack.peek().endLabel;
+    }
+
+    private String getCurrentLoopCondLabel() {
+        return loopStack.isEmpty() ? null : loopStack.peek().condLabel;
+    }
+
     // Program Structure
     @Override
     public Object visitProgram(delphiParser.ProgramContext ctx) {
@@ -147,55 +168,44 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         mainCode.add("define i32 @main() {");
         mainCode.add("  entry:");
 
-        // 1. Allocate and initialize all variables
+        // Initialize global variables
         for (String varName : symbolTable.keySet()) {
             if (!varName.startsWith("%")) {
-                mainCode.add("  %" + varName + ".addr = alloca " + symbolTable.get(varName));
                 mainCode.add("  store " + symbolTable.get(varName) + " " +
                         getDefaultValue(symbolTable.get(varName)) + ", " +
-                        symbolTable.get(varName) + "* %" + varName + ".addr");
+                        symbolTable.get(varName) + "* @" + varName);
             }
         }
 
-        // 2. Identify executable code and declarations
+        // Separate executable code from declarations
         List<String> executableCode = new ArrayList<>();
         List<String> declarations = new ArrayList<>();
 
-        boolean inMain = false;
         for (String line : irCode) {
-            // Skip header that's already added
-            if (line.startsWith("declare") || line.startsWith("attributes")) {
-                continue;
-            }
-
-            // Skip global variable declarations (already handled)
             if (line.startsWith("@") && line.contains("global")) {
                 declarations.add(line);
-                continue;
-            }
-
-            if (isExecutableInstruction(line)) {
+            } else if (isExecutableInstruction(line)) {
                 executableCode.add("  " + line);
             } else if (!line.trim().isEmpty()) {
-                // Handle label declarations properly
                 if (line.endsWith(":")) {
-                    executableCode.add("  " + line);
+                    executableCode.add(line); // Labels shouldn't be indented
                 } else {
                     declarations.add(line);
                 }
             }
         }
 
-        // 3. Add the executable code to main
+        // Combine everything
         mainCode.addAll(executableCode);
 
-        // Add return statement if not present
-        if (!executableCode.isEmpty() && !executableCode.get(executableCode.size() - 1).contains("ret")) {
+        // Ensure we have a return
+        if (mainCode.stream().noneMatch(s -> s.contains("ret"))) {
             mainCode.add("  ret i32 0");
         }
+
         mainCode.add("}");
 
-        // Rebuild IR with declarations first, then main function
+        // Rebuild IR
         irCode = declarations;
         irCode.addAll(mainCode);
     }
@@ -358,10 +368,7 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         String llvmType = mapType(pascalType);
 
         symbolTable.put(varName, llvmType);
-
-        // Define as global variable
         emit("@" + varName + " = global " + llvmType + " " + getDefaultValue(llvmType));
-
         return null;
     }
 
@@ -476,25 +483,31 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
 
     @Override
     public Object visitWhileStatement(delphiParser.WhileStatementContext ctx) {
-        String condLabel = newLabel();
-        String bodyLabel = newLabel();
-        String endLabel = newLabel();
+        String condLabel = "while.cond." + labelCounter++;
+        String bodyLabel = "while.body." + labelCounter++;
+        String endLabel = "while.end." + labelCounter++;
 
-        // Jump to condition check
+        // Push loop context
+        loopStack.push(new LoopContext(condLabel, bodyLabel, endLabel));
+
+        // Initial branch to condition
         emit("br label %" + condLabel);
 
-        // Condition check
+        // Condition block
         emit(condLabel + ":");
         String condValue = visitExpression(ctx.expression(), "i1");
         emit("br i1 " + condValue + ", label %" + bodyLabel + ", label %" + endLabel);
 
-        // Loop body
+        // Body block
         emit(bodyLabel + ":");
         visit(ctx.statement());
-        emit("br label %" + condLabel);
+        emit("br label %" + condLabel); // Loop back
 
-        // End of while loop
+        // End block
         emit(endLabel + ":");
+
+        // Pop loop context
+        loopStack.pop();
         return null;
     }
 
@@ -556,5 +569,27 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
         String literalName = "@.str." + (++stringLiteralCounter);
         stringLiterals.put(literalName, content);
         return literalName;
+    }
+
+    @Override
+    public Object visitBreakStatement(delphiParser.BreakStatementContext ctx) {
+        String endLabel = getCurrentLoopEndLabel();
+        if (endLabel != null) {
+            emit("br label %" + endLabel);
+        } else {
+            emit("; ERROR: break outside loop");
+        }
+        return null;
+    }
+
+    @Override
+    public Object visitContinueStatement(delphiParser.ContinueStatementContext ctx) {
+        String condLabel = getCurrentLoopCondLabel();
+        if (condLabel != null) {
+            emit("br label %" + condLabel);
+        } else {
+            emit("; ERROR: continue outside loop");
+        }
+        return null;
     }
 }

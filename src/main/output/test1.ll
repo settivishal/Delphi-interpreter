@@ -14,10 +14,8 @@ attributes #1 = { "wasm-import-module"="env" }
 @y = global i32 0
 define i32 @main() {
   entry:
-  %x.addr = alloca i32
-  store i32 0, i32* %x.addr
-  %y.addr = alloca i32
-  store i32 0, i32* %y.addr
+  store i32 0, i32* @x
+  store i32 0, i32* @y
   %1 = add i32 1, 5
   store i32 %1, i32* @x
   %3 = load i32, i32* @x
