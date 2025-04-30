@@ -456,9 +456,9 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
     @Override
     public Object visitIfStatement(delphiParser.IfStatementContext ctx) {
         String condValue = visitExpression(ctx.expression(), "i1");
-        String thenLabel = newLabel();
-        String elseLabel = newLabel();
-        String endLabel = newLabel();
+        String thenLabel = "if.then." + labelCounter++;
+        String elseLabel = "if.else." + labelCounter++;
+        String endLabel = "if.end." + labelCounter++;
 
         // Branch based on condition
         emit("br i1 " + condValue + ", label %" + thenLabel + ", label %" +
@@ -466,18 +466,76 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
 
         // Then block
         emit(thenLabel + ":");
-        visit(ctx.statement(0));
+        visit(ctx.statement(0));  // Visit the compound statement
         emit("br label %" + endLabel);
 
         // Else block (if present)
         if (ctx.ELSE() != null) {
             emit(elseLabel + ":");
             visit(ctx.statement(1));
-            emit("br label %" + endLabel);
+        }
+        emit("br label %" + endLabel);
+
+        // End of if
+        emit(endLabel + ":");
+        return null;
+    }
+
+    @Override
+    public Object visitForStatement(delphiParser.ForStatementContext ctx) {
+        // Get the loop variable and bounds from the grammar structure
+        String varName = ctx.identifier().getText();
+        delphiParser.ForListContext forList = ctx.forList();
+
+        // Get initial and final values
+        String startVal = forList.initialValue().getText();
+        String endVal = forList.finalValue().getText();
+        boolean isDownto = forList.DOWNTO() != null;
+
+        // Generate labels
+        String condLabel = "for.cond." + labelCounter++;
+        String bodyLabel = "for.body." + labelCounter++;
+        String incLabel = "for.inc." + labelCounter++;
+        String endLabel = "for.end." + labelCounter++;
+
+        // Initialize loop variable
+        emit("store i32 " + startVal + ", i32* @" + varName);
+        emit("br label %" + condLabel);
+
+        // Condition check
+        emit(condLabel + ":");
+        String currentVal = newTemp();
+        emit(currentVal + " = load i32, i32* @" + varName);
+        String cmpResult = newTemp();
+
+        // Use appropriate comparison based on TO/DOWNTO
+        if (isDownto) {
+            emit(cmpResult + " = icmp sge i32 " + currentVal + ", " + endVal);
+        } else {
+            emit(cmpResult + " = icmp sle i32 " + currentVal + ", " + endVal);
         }
 
-        // End of if statement
+        emit("br i1 " + cmpResult + ", label %" + bodyLabel + ", label %" + endLabel);
+
+        // Loop body
+        emit(bodyLabel + ":");
+        visit(ctx.statement());
+        emit("br label %" + incLabel);
+
+        // Increment/Decrement
+        emit(incLabel + ":");
+        String nextVal = newTemp();
+        if (isDownto) {
+            emit(nextVal + " = sub i32 " + currentVal + ", 1");
+        } else {
+            emit(nextVal + " = add i32 " + currentVal + ", 1");
+        }
+        emit("store i32 " + nextVal + ", i32* @" + varName);
+        emit("br label %" + condLabel);
+
+        // End of loop
         emit(endLabel + ":");
+
         return null;
     }
 
@@ -547,19 +605,22 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
     @Override
     public Object visitProcedureStatement(delphiParser.ProcedureStatementContext ctx) {
         if (ctx.getText().toUpperCase().startsWith("WRITELN")) {
-            // Extract the content inside parentheses
-            String content = ctx.getText().substring(ctx.getText().indexOf('(') + 1, ctx.getText().lastIndexOf(')')).trim();
+            String content = ctx.getText().substring(
+                    ctx.getText().indexOf('(') + 1,
+                    ctx.getText().lastIndexOf(')')).trim();
 
             if (content.startsWith("'") && content.endsWith("'")) {
-                String strContent = content.substring(1, content.length()-1);
-                String literalName = registerStringLiteral(strContent);
-                String temp = newTemp();
-                emit(temp + " = getelementptr inbounds [" + (strContent.length()+1) +
-                        " x i8], [" + (strContent.length()+1) + " x i8]* " + literalName + ", i64 0, i64 0");
-                emit("call void @writeln_str(i8* " + temp + ")");
+                // Handle string output
             } else {
-                String val = evaluateRHS(content, "i32");
-                emit("call void @writeln_i32(i32 " + val + ")");
+                // Handle variable/number output
+                if (symbolTable.containsKey(content)) {
+                    String temp = newTemp();
+                    emit(temp + " = load i32, i32* @" + content);
+                    emit("call void @writeln_i32(i32 " + temp + ")");
+                } else {
+                    // Default to 0 if variable not found
+                    emit("call void @writeln_i32(i32 0)");
+                }
             }
         }
         return null;
