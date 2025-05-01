@@ -15,19 +15,28 @@ Before running this project, ensure you have the following installed:
 - Java Development Kit (JDK) 21 or later.
 - Apache Maven 3.6+.
 - A compatible IDE, IntelliJ IDEA preferably.
+- LLVM installed with clang
 
 ## Project Structure
 ```
-Delphi/
-│── src/
-│   ├── main/java/org/example/antlr/                    (Generated ANTLR files)
-│   ├── main/java/org/example/antlr/ExecuteVisitor.java (Java file extends delphiBaseVisitor)
-│   ├── test/java/org/example/Interpreter               (Main Interpreter file)
-│   ├── main/delphi.g4                                  (ANTLR4 Grammar file)
-│   ├── main/tests                                      (Test case files)
-│── pom.xml     (Maven build configuration)
-│── README.md   (This file)
-│── .gitignore  (Exclude paths)
+Delphi-Interpreter
+│── src
+│   └── main
+│       ├── java
+│           └── org.example
+│               ├── Compiler                      (Contains the main compiler logic that generates .ll and .wasm files)
+│               └── antlr                         (ANTLR-generated parser files and custom visitors)
+│                   └── LLVMCodeGenerator.java    (Generates LLVM IR code from the parsed AST)
+│       ├── output                                (Directory for generated .ll files during compilation)
+│       ├── tests                                 (Test case files .pas)
+│       ├── web                                   (Web hosting components)
+│           ├── index.html                        (Browser interface for WASM execution)
+│           ├── runtime.js                        (JavaScript runtime for WASM module interaction)
+│           └── wasm                              (Stores compiled WebAssembly binaries)
+│       ├── delphi.g4                             (ANTLR4 Grammar file)
+│── pom.xml                                       (Maven configuration file with project dependencies)
+│── README.md                                     (Project documentation - This file)             
+│── .gitignore                                    (Exclude paths)
 ```
 
 ## Features Implemented
@@ -68,6 +77,12 @@ This project extends Pascal to support:
 - Static Scoping
   - Static Scoping Implemented
 
+## Compilation Pipeline
+- ANTLR4 parsing to AST
+- LLVM IR (.ll) generation
+- WebAssembly (.wasm) compilation
+- Browser execution with HTML and JavaScript code
+
 ## Installation & Build
 - Download the .zip file and extract the files into a folder.
 - Ensure that Maven is installed and working by running:
@@ -90,11 +105,34 @@ mvn clean
 mvn compile
 ```
 
-- **Run the program**
+## Compilation Process
+- RGenerate LLVM IR and WASM
+```
+mvn exec:java -D"exec.mainClass"="org.example.Compiler" -D"exec.args"="test"
+```
+
+- By running the above command, the corresponding ```.ll``` and ```.wasm``` files are generated. ```test.ll``` file is generated in output folder and ```test.wasm``` is generated in ```wasm``` folder inside ```web``` folder.
+
+## Running in Browser
+- Generate the WASM file as above
 
 
-- You need to write test cases covering all implemented features. 
+- Start a local web server
 
+```commandline
+cd src/main/web
+```
+
+```
+python -m http.server 8000
+```
+- Open http://localhost:8000 in your browser
+ 
+
+- The page will load and execute the WASM module
+
+
+- Now click the desired test case to get the output in the text box.
 
 **Recommended approach:**
 
@@ -104,5 +142,5 @@ mvn compile
 
 - Run the test cases:
 ```
-mvn exec:java -D"exec.mainClass"="org.example.Interpreter" -D"exec.args"="test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11 test12 test13 test14"
+mvn exec:java -D"exec.mainClass"="org.example.Interpreter" -D"exec.args"="test test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11 test12 test13 test14"
 ```
