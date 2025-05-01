@@ -113,17 +113,17 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
     private Map<String, String> stringLiterals = new HashMap<>();
     private int stringLiteralCounter = 0;
 
-    private void emitHeader() {
-        // Function declarations with proper attributes
-        emit("declare void @writeln_i32(i32) #1");
-        emit("declare void @writeln_str(i8*) #1");
-        emit("");
-
-        // Attribute sections
-        emit("attributes #0 = { \"wasm-export-name\"=\"memory\" }");
-        emit("attributes #1 = { \"wasm-import-module\"=\"env\" }");
-        emit("");
-    }
+//    private void emitHeader() {
+//        // Function declarations with proper attributes
+//        emit("declare void @writeln_i32(i32) #1");
+//        emit("declare void @writeln_str(i8*) #1");
+//        emit("");
+//
+//        // Attribute sections
+//        emit("attributes #0 = { \"wasm-export-name\"=\"memory\" }");
+//        emit("attributes #1 = { \"wasm-import-module\"=\"env\" }");
+//        emit("");
+//    }
 
     // Type Mapping
     private String mapType(String pascalType) {
@@ -249,7 +249,7 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
     private void emitConstructor(LLVMClass classDef) {
         String className = classDef.name;
         emit("define %struct." + className + "* @" + className + "_create() {");
-        emit("  entry:");
+        emit("entry:");
 
         // Calculate size
         int size = classDef.fields.values().stream()
@@ -613,6 +613,17 @@ public class LLVMCodeGenerator extends delphiBaseVisitor<Object> {
 
             if (content.startsWith("'") && content.endsWith("'")) {
                 // Handle string output
+                String strContent = content.substring(1, content.length() - 1);
+                String literalName = registerStringLiteral(strContent);
+
+                // Get pointer to the string
+                String strPtr = newTemp();
+                emit(strPtr + " = getelementptr inbounds [" + (strContent.length() + 1) +
+                        " x i8], [" + (strContent.length() + 1) + " x i8]* " +
+                        literalName + ", i64 0, i64 0");
+
+                // Call writeln_str
+                emit("call void @writeln_str(i8* " + strPtr + ")");
             } else {
                 // Handle variable/number output
                 if (symbolTable.containsKey(content)) {

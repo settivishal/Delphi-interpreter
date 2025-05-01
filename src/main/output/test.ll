@@ -8,9 +8,12 @@ declare void @writeln_str(i8*) #1
 attributes #0 = { "wasm-export-name"="memory" }
 attributes #1 = { "wasm-import-module"="env" }
 
+@.str.1 = private unnamed_addr constant [14 x i8] c"Hello, World!\00"
 
 ; Program: Hello
 define i32 @main() {
   entry:
+  %1 = getelementptr inbounds [14 x i8], [14 x i8]* @.str.1, i64 0, i64 0
+  call void @writeln_str(i8* %1)
   ret i32 0
 }
