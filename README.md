@@ -20,7 +20,7 @@ Before running this project, ensure you have the following installed:
 ## Project Structure
 ```
 Delphi-Interpreter
-│── src
+├── src
 │   └── main
 │       ├── java
 │           └── org.example
@@ -34,8 +34,8 @@ Delphi-Interpreter
 │           ├── runtime.js                        (JavaScript runtime for WASM module interaction)
 │           └── wasm                              (Stores compiled WebAssembly binaries)
 │       └── delphi.g4                             (ANTLR4 Grammar file)
-│── pom.xml                                       (Maven configuration file with project dependencies)
-│── README.md                                     (Project documentation - This file)             
+├── pom.xml                                       (Maven configuration file with project dependencies)
+├── README.md                                     (Project documentation - This file)             
 └── .gitignore                                    (Exclude paths)
 ```
 
