@@ -109,12 +109,22 @@ mvn compile
 ```
 
 ## Compilation Process
-- RGenerate LLVM IR and WASM
+- Generate LLVM IR and WASM
 ```
 mvn exec:java -D"exec.mainClass"="org.example.Compiler" -D"exec.args"="test"
 ```
 
 - By running the above command, the corresponding ```.ll``` and ```.wasm``` files are generated. ```test.ll``` file is generated in output folder and ```test.wasm``` is generated in ```wasm``` folder inside ```web``` folder.
+
+- The ```test.ll``` is generated using ```LLVMCodeGenerator``` class.
+
+- The command used underhood for converting ```.ll``` files to ```.wasm``` files is:
+```
+clang -target wasm32-unknown-unknown -O3 -nostdlib "-Wl,--no-entry" "-Wl,--export-all" "-Wl,--allow-undefined" -o src/main/web/wasm/test.wasm src/main/output/test.ll
+```
+
+- Since ```llc``` is not included with LLVM installation, we had to use ```clang``` command.
+
 
 ## Running in Browser
 - Generate the WASM file as above
@@ -149,3 +159,9 @@ python -m http.server 8000
 ```
 mvn exec:java -D"exec.mainClass"="org.example.Interpreter" -D"exec.args"="test test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11 test12 test13 test14"
 ```
+
+
+
+
+
+
