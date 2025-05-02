@@ -17,6 +17,9 @@ Before running this project, ensure you have the following installed:
 - A compatible IDE, IntelliJ IDEA preferably.
 - LLVM installed with clang
 
+## Video Demo
+Video: [Demo]()
+
 ## Project Structure
 ```
 Delphi-Interpreter
@@ -126,7 +129,9 @@ cd src/main/web
 ```
 python -m http.server 8000
 ```
-- Open http://localhost:8000 in your browser
+- Open http://localhost:8000 in your browser.
+
+![image](https://github.com/user-attachments/assets/f6517542-1664-4bb1-a34b-e4e4e303fd37)
  
 
 - The page will load and execute the WASM module
