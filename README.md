@@ -33,10 +33,10 @@ Delphi-Interpreter
 │           ├── index.html                        (Browser interface for WASM execution)
 │           ├── runtime.js                        (JavaScript runtime for WASM module interaction)
 │           └── wasm                              (Stores compiled WebAssembly binaries)
-│       ├── delphi.g4                             (ANTLR4 Grammar file)
+│       └── delphi.g4                             (ANTLR4 Grammar file)
 │── pom.xml                                       (Maven configuration file with project dependencies)
 │── README.md                                     (Project documentation - This file)             
-│── .gitignore                                    (Exclude paths)
+└── .gitignore                                    (Exclude paths)
 ```
 
 ## Features Implemented
